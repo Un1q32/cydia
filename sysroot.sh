@@ -25,8 +25,9 @@ fi
 
 wget -O macsdk.tar.xz 'https://github.com/phracker/MacOSX-SDKs/releases/download/11.3/MacOSX10.8.sdk.tar.xz'
 tar -xf macsdk.tar.xz
-macsdk="$PWD/MacOSX10.8.sdk"
-rm -rf sysroot
+mv MacOS*.sdk macsdk
+macsdk="$PWD/macsdk"
+rm -rf sysroot macsdk.tar.xz
 mkdir sysroot
 cd sysroot
 
