@@ -23,9 +23,9 @@ if gtar --help | grep bsdtar &>/dev/null; then
     exit 1
 fi
 
-wget -O macsdk.tar.xz 'https://github.com/phracker/MacOSX-SDKs/releases/download/11.3/MacOSX10.7.sdk.tar.xz'
+wget -O macsdk.tar.xz 'https://github.com/phracker/MacOSX-SDKs/releases/download/11.3/MacOSX10.8.sdk.tar.xz'
 tar -xf macsdk.tar.xz
-macsdk="$PWD/MacOSX10.7.sdk"
+macsdk="$PWD/MacOSX10.8.sdk"
 rm -rf sysroot
 mkdir sysroot
 cd sysroot
