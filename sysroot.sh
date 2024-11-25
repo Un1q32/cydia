@@ -23,6 +23,9 @@ if gtar --help | grep bsdtar &>/dev/null; then
     exit 1
 fi
 
+wget -O macsdk.tar.xz 'https://raw.githubusercontent.com/Un1q32/mac-sdk/refs/heads/master/MacOSX10.6.sdk.tar.xz'
+tar -xf macsdk.tar.xz
+macsdk="$PWD/MacOSX10.6.sdk"
 rm -rf sysroot
 mkdir sysroot
 cd sysroot
@@ -143,7 +146,7 @@ else
 fi
 
 for framework in ApplicationServices CoreServices IOKit IOSurface JavaScriptCore WebKit; do
-    ln -s /System/Library/Frameworks/"${framework}".framework/Headers "${framework}"
+    ln -s "${macsdk}"/System/Library/Frameworks/"${framework}".framework/Headers "${framework}"
 done
 
 for framework in /System/Library/Frameworks/CoreServices.framework/Frameworks/*.framework; do
