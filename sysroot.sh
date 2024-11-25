@@ -1,7 +1,7 @@
 #!/usr/local/bin/bash
 
-if [[ ${BASH_VERSION} != 4* ]]; then
-    echo "bash 4.0 required. Please read compiling.txt." 1>&2
+if [ "${BASH_VERSION%%.*}" -lt 4 ]; then
+    echo "bash 4.0 or newer required. Please read compiling.txt." 1>&2
     exit 1
 fi
 
