@@ -23,11 +23,14 @@ if gtar --help | grep bsdtar &>/dev/null; then
     exit 1
 fi
 
-wget -O macsdk.tar.xz 'https://github.com/phracker/MacOSX-SDKs/releases/download/11.3/MacOSX10.8.sdk.tar.xz'
-tar -xf macsdk.tar.xz
-mv MacOS*.sdk macsdk
-macsdk="$PWD/macsdk"
-rm -rf sysroot macsdk.tar.xz
+if [ -n "$DLSDK" ]; then
+    wget -O macsdk.tar.xz 'https://github.com/phracker/MacOSX-SDKs/releases/download/11.3/MacOSX10.8.sdk.tar.xz'
+    tar -xf macsdk.tar.xz
+    mv MacOS*.sdk macsdk
+    macsdk="$PWD/macsdk"
+    rm macsdk.tar.xz
+fi
+rm -rf sysroot
 mkdir sysroot
 cd sysroot
 
