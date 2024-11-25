@@ -149,7 +149,7 @@ for framework in ApplicationServices CoreServices IOKit IOSurface JavaScriptCore
     ln -s "${macsdk}"/System/Library/Frameworks/"${framework}".framework/Headers "${framework}"
 done
 
-for framework in /System/Library/Frameworks/CoreServices.framework/Frameworks/*.framework; do
+for framework in "${macsdk}"/System/Library/Frameworks/CoreServices.framework/Frameworks/*.framework; do
     name=${framework}
     name=${name%.framework}
     name=${name##*/}
