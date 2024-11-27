@@ -40,6 +40,7 @@
 #include <Foundation/Foundation.h>
 #include <CydiaSubstrate/CydiaSubstrate.h>
 #include <CyteKit/UCPlatform.h>
+#include <Menes/ObjectHandle.h>
 
 #include <cstdio>
 
