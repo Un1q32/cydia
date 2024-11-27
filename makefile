@@ -1,4 +1,4 @@
-gxx := clang++
+gxx := clang++ -stdlib=libstdc++
 
 flags := 
 link := 
