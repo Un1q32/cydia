@@ -4681,7 +4681,7 @@ static _H<NSMutableSet> Diversions_;
     NSString *href([url absoluteString]);
     NSString *host([url host]);
 
-    if ([href hasPrefix:@"https://cydia.saurik.com/TSS/"]) {
+    if ([href hasPrefix:@"http://cydia.saurik.com/TSS/"]) {
         if (NSString *agent = [copy valueForHTTPHeaderField:@"X-User-Agent"]) {
             [copy setValue:agent forHTTPHeaderField:@"User-Agent"];
             [copy setValue:nil forHTTPHeaderField:@"X-User-Agent"];
