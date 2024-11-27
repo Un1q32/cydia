@@ -181,8 +181,6 @@ debs/cydia_$(version)_iphoneos-arm.deb: MobileCydia preinst postinst cfversion $
 	./control.sh cydia.control _ >_/DEBIAN/control
 	cp -a preinst postinst _/DEBIAN/
 	
-	find _ -exec touch -t "$$(date -j -f "%s" +"%Y%m%d%H%M.%S" "$$(git show --format='format:%ct' | head -n 1)")" {} ';'
-	
 	sudo chown -R 0 _
 	sudo chgrp -R 0 _
 	sudo chmod 6755 _/Applications/Cydia.app/MobileCydia
