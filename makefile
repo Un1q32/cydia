@@ -1,4 +1,5 @@
 gxx := clang++
+strip := strip
 
 flags := 
 link := 
@@ -127,7 +128,7 @@ MobileCydia: sysroot $(object) entitlements.xml
 	@mkdir -p bins
 	@cp -a $@ bins/$@-$(version)
 	@echo "[strp] $@"
-	@strip -no_uuid $@
+	@$(strip) -no_uuid $@
 	@echo "[sign] $@"
 	@ldid -T0 -Sentitlements.xml $@ || { rm -f $@ && false; }
 
