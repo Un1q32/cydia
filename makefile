@@ -57,7 +57,7 @@ backrow += -FAppleTV -framework BackRow -framework AppleTV
 
 version := $(shell ./version.sh)
 
-cycc = $(gxx) -arch armv6 -o $@ -miphoneos-version-min=3.0 -isysroot $(sdk) -idirafter /usr/include -F{sysroot,}/Library/Frameworks
+cycc = $(gxx) -arch armv6 -o $@ -target armv6-apple-ios3 -isysroot $(sdk) -idirafter /usr/include -F{sysroot,}/Library/Frameworks
 
 dirs := Menes CyteKit Cydia SDURLCache
 
