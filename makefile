@@ -135,8 +135,8 @@ MobileCydia: sysroot $(object) entitlements.xml
 CydiaAppliance: CydiaAppliance.mm
 	$(cycc) $(filter %.mm,$^) $(flags) $(link) -bundle $(libs) $(backrow)
 
-cfversion: cfversion.mm
-	$(cycc) $(filter %.mm,$^) $(flags) -framework CoreFoundation
+cfversion: cfversion.c
+	$(cycc) $(filter %.c,$^) $(flags) $(link) -framework CoreFoundation
 	@ldid -T0 -S $@
 
 postinst: postinst.mm Sources.mm Sources.h CyteKit/stringWithUTF8Bytes.mm CyteKit/stringWithUTF8Bytes.h CyteKit/UCPlatform.h

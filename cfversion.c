@@ -1,7 +1,7 @@
 #include <CoreFoundation/CoreFoundation.h>
-#include <cstdio>
+#include <stdio.h>
 
-int main() {
+int main(void) {
     printf("%.2f\n", kCFCoreFoundationVersionNumber);
     return 0;
 }
