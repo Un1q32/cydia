@@ -1,8 +1,3 @@
-dev := $(shell xcode-select --print-path)/Platforms/iPhoneOS.platform/Developer
-sdks := $(dev)/SDKs
-ioss := $(sort $(patsubst $(sdks)/iPhoneOS%.sdk,%,$(wildcard $(sdks)/iPhoneOS*.sdk)))
-ios := $(word $(words $(ioss)),$(ioss))
-
 gxx := clang++
 
 flags := 
@@ -20,7 +15,7 @@ else
 dpkg := dpkg-deb
 endif
 
-sdk := $(sdks)/iPhoneOS$(ios).sdk
+sdk := $(shell pwd)/iossdk
 
 flags += -F$(sdk)/System/Library/PrivateFrameworks
 flags += -I. -isystem sysroot/usr/include
