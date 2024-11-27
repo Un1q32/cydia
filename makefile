@@ -3,14 +3,7 @@ sdks := $(dev)/SDKs
 ioss := $(sort $(patsubst $(sdks)/iPhoneOS%.sdk,%,$(wildcard $(sdks)/iPhoneOS*.sdk)))
 ios := $(word $(words $(ioss)),$(ioss))
 
-# if you can tolerate clang, set this to blank
-gcc := 4.2
-
-ifeq ($(gcc),)
-gxx := $(dev)/usr/bin/clang++
-else
-gxx := $(dev)/usr/bin/g++
-endif
+gxx := clang++
 
 flags := 
 link := 
