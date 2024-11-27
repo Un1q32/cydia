@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 png=$1
 out=$2
@@ -10,18 +10,28 @@ dst=${out}.dst.png
 
 copy=("${src}" "${dst}")
 
-function step() {
+step() {
     "$@"
     mv -f "${dst}" "${src}"
     steps+=($(stat -f "%z" "${src}"))
 }
 
-if command -v xcode-select > /dev/null; then
+pngcrush-mac() {
+    "$pngcrush" -q -rem alla -reduce -iphone "${copy[@]}"
+}
+
+pngcrush-other() {
+    pngcrush -q -rem alla -reduce "${copy[@]}"
+    pincrush -i "${copy[1]}"
+}
+
+if command -v pincrush > /dev/null && command -v pngcrush > /dev/null; then
+    pngcrushfunc=pngcrush-other
+elif command -v xcode-select > /dev/null; then
     pngcrush=$(xcode-select --print-path)/Platforms/iPhoneOS.platform/Developer/usr/bin/pngcrush
-elif command -v pngcrush > /dev/null; then
-    pngcrush=pngcrush
+    pngcrushfunc=pngcrush-mac
 else
-    echo "pngcrush not found"
+    echo "pngcrush or pincrush not found"
     exit 1
 fi
 
@@ -40,7 +50,7 @@ step cp -fa "${png}" "${dst}"
 #step "${pngcrush}" -q -rem alla -reduce -brute "${copy[@]}"
 #step pincrush "${copy[@]}"
 
-step "${pngcrush}" -q -rem alla -reduce -iphone "${copy[@]}"
+step "${pngcrushfunc}"
 
 #"${pngcrush}" -q -rem alla -reduce -brute -iphone "${png}" 1.png
 #"${pngcrush}" -q -iphone _.png 2.png
