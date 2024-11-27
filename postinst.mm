@@ -3,6 +3,7 @@
 
 #include <sys/types.h>
 #include <sys/sysctl.h>
+#include <Menes/ObjectHandle.h>
 
 #include <CydiaSubstrate/CydiaSubstrate.h>
 #include "CyteKit/PerlCompatibleRegEx.hpp"
