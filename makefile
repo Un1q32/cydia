@@ -187,7 +187,7 @@ debs/cydia_$(version)_iphoneos-arm.deb: MobileCydia preinst postinst cfversion $
 	mkdir -p debs
 	ln -sf debs/cydia_$(version)_iphoneos-arm.deb Cydia.deb
 	$(dpkg) -b _ Cydia.deb
-	@echo "$$(ls -l $$(readlink Cydia.deb) | awk '{print \$5}') $$(readlink Cydia.deb)"
+	@echo "$$(ls -l $$(readlink Cydia.deb) | awk '{print $$5}') $$(readlink Cydia.deb)"
 
 $(lproj_deb): $(shell find MobileCydia.app -name '*.strings') cydia-lproj.control
 	sudo rm -rf __
@@ -204,7 +204,7 @@ $(lproj_deb): $(shell find MobileCydia.app -name '*.strings') cydia-lproj.contro
 	mkdir -p debs
 	ln -sf debs/cydia-lproj_$(version)_iphoneos-arm.deb Cydia_.deb
 	$(dpkg) -b __ Cydia_.deb
-	@echo "$$(ls -l $$(readlink Cydia_.deb) | awk '{print \$5}') $$(readlink Cydia_.deb)"
+	@echo "$$(ls -l $$(readlink Cydia_.deb) | awk '{print $$5}') $$(readlink Cydia_.deb)"
 	
 package: debs/cydia_$(version)_iphoneos-arm.deb $(lproj_deb)
 
