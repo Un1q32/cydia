@@ -23,7 +23,8 @@ if gtar --help | grep bsdtar &>/dev/null; then
     exit 1
 fi
 
-wget -O iossdk.tar.lzma "https://invoxiplaygames.uk/sdks/iPhoneOS3.0.sdk.tar.lzma"
+rm -rf iossdk macsdk
+wget -O iossdk.tar.lzma "https://invoxiplaygames.uk/sdks/iPhoneOS4.0.sdk.tar.lzma"
 tar -xf iossdk.tar.lzma
 mv iPhoneOS*.sdk iossdk
 wget -O macsdk.tar.xz "https://github.com/phracker/MacOSX-SDKs/releases/download/11.3/MacOSX10.6.sdk.tar.xz"
