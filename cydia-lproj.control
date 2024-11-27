@@ -1,11 +1,12 @@
-Package: cydia-lproj
+Package: iphoneports-cydia-lproj
 Priority: required
 Section: Packaging
-Maintainer: Jay Freeman (saurik) <saurik@saurik.com>
+Maintainer: Uniq <joey.t.reinhart@gmail.com>
 Architecture: iphoneos-arm
 Version: 
-Replaces: cydia
-Depends: cydia
+Replaces: cydia, cydia-lproj
+Depends: iphoneports-cydia
+Conflicts: cydia-lproj
 Description: languages and translations for Cydia
 Name: Cydia Translations
 Author: Jay Freeman (saurik) <saurik@saurik.com>
