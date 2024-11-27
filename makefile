@@ -91,8 +91,6 @@ object := $(object:%=Objects/%)
 images := $(shell find MobileCydia.app/ -type f -name '*.png')
 images := $(images:%=Images/%)
 
-lproj_deb := debs/cydia-lproj_$(version)_iphoneos-arm.deb
-
 all: MobileCydia
 
 clean:
@@ -165,7 +163,6 @@ debs/cydia_$(version)_iphoneos-arm.deb: MobileCydia preinst postinst cfversion $
 	
 	mkdir -p _/Applications
 	cp -a MobileCydia.app _/Applications/Cydia.app
-	rm -rf _/Applications/Cydia.app/*.lproj
 	cp -a MobileCydia _/Applications/Cydia.app/MobileCydia
 	
 	cd MobileCydia.app && find . -name '*.png' -exec cp -af ../Images/MobileCydia.app/{} ../_/Applications/Cydia.app/{} ';'
@@ -194,23 +191,6 @@ debs/cydia_$(version)_iphoneos-arm.deb: MobileCydia preinst postinst cfversion $
 	$(dpkg) -b _ Cydia.deb
 	@echo "$$(ls -l $$(readlink Cydia.deb) | awk '{print $$5}') $$(readlink Cydia.deb)"
 
-$(lproj_deb): $(shell find MobileCydia.app -name '*.strings') cydia-lproj.control
-	sudo rm -rf __
-	mkdir -p __/Applications/Cydia.app
-	
-	cp -a MobileCydia.app/*.lproj __/Applications/Cydia.app
-	
-	mkdir -p __/DEBIAN
-	./control.sh cydia-lproj.control __ >__/DEBIAN/control
-	
-	sudo chown -R 0 __
-	sudo chgrp -R 0 __
-	
-	mkdir -p debs
-	ln -sf debs/cydia-lproj_$(version)_iphoneos-arm.deb Cydia_.deb
-	$(dpkg) -b __ Cydia_.deb
-	@echo "$$(ls -l $$(readlink Cydia_.deb) | awk '{print $$5}') $$(readlink Cydia_.deb)"
-	
-package: debs/cydia_$(version)_iphoneos-arm.deb $(lproj_deb)
+package: debs/cydia_$(version)_iphoneos-arm.deb
 
 .PHONY: all clean package
