@@ -61,7 +61,7 @@ backrow += -FAppleTV -framework BackRow -framework AppleTV
 version := $(shell ./version.sh)
 
 cycc = $(gxx) -o $@ -target armv6-apple-ios3 -isysroot $(sdk) -idirafter /usr/include -F{sysroot,}/Library/Frameworks
-ifeq($(shell uname -s),Linux)
+ifeq ($(shell uname -s),Linux)
 cycc += -fuse-ld=ld64
 endif
 
