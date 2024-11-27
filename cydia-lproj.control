@@ -7,6 +7,7 @@ Version:
 Replaces: cydia, cydia-lproj
 Depends: iphoneports-cydia
 Conflicts: cydia-lproj
+Provides: cydia-lproj
 Description: languages and translations for Cydia
 Name: Cydia Translations
 Author: Jay Freeman (saurik) <saurik@saurik.com>
