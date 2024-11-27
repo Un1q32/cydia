@@ -1,5 +1,5 @@
 gxx := clang++
-ifeq ($(uname -s),Darwin)
+ifeq ($(shell uname -s),Darwin)
 strip := strip
 else
 strip := cctools-strip
