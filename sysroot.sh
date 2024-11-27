@@ -23,11 +23,14 @@ if gtar --help | grep bsdtar &>/dev/null; then
     exit 1
 fi
 
-wget -O macsdk.tar.xz "https://github.com/phracker/MacOSX-SDKs/releases/download/11.3/MacOSX${MACSDKVER:-10.6}.sdk.tar.xz"
+wget -O iossdk.tar.lzma "https://invoxiplaygames.uk/sdks/iPhoneOS3.0.sdk.tar.lzma"
+tar -xf iossdk.tar.lzma
+mv iPhoneOS*.sdk iossdk
+wget -O macsdk.tar.xz "https://github.com/phracker/MacOSX-SDKs/releases/download/11.3/MacOSX10.6.sdk.tar.xz"
 tar -xf macsdk.tar.xz
 mv MacOS*.sdk macsdk
 macsdk="$PWD/macsdk"
-rm macsdk.tar.xz
+rm macsdk.tar.xz iossdk.tar.lzma
 rm -rf sysroot
 mkdir sysroot
 cd sysroot
