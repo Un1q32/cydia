@@ -4,16 +4,7 @@ flags :=
 link := 
 libs := 
 
-ifeq (o,O) # gzip is actually better
-dpkg := /Library/Cydia/bin/dpkg-deb
-ifeq ($(wildcard $(dpkg)),$(dpkg))
-dpkg := $(dpkg) -zlzma
-else
-dpkg := dpkg-deb -zbzip2
-endif
-else
-dpkg := dpkg-deb
-endif
+dpkg := dpkg-deb -Zgzip
 
 sdk := $(shell pwd)/iossdk
 
