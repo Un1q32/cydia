@@ -42,7 +42,6 @@ int main(int argc, const char *argv[]) {
         CydiaAddSource(@"http://apt.thebigboss.org/repofiles/cydia/", @"stable", [NSMutableArray arrayWithObject:@"main"]);
         CydiaAddSource(@"http://modmyi.saurik.com/", @"stable", [NSMutableArray arrayWithObject:@"main"]);
         CydiaAddSource(@"http://cydia.zodttd.com/repo/cydia/", @"stable", [NSMutableArray arrayWithObject:@"main"]);
-        CydiaAddSource(@"http://cydia.uniq.gay/", @"stable", [NSMutableArray arrayWithObject:@"main"]);
     }
 
     CydiaWriteSources();
