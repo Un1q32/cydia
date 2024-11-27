@@ -1,5 +1,9 @@
 gxx := clang++
+ifeq ($(uname -s),Darwin)
 strip := strip
+else
+strip := cctools-strip
+endif
 
 flags := 
 link := 
