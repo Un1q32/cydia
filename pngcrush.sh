@@ -19,8 +19,12 @@ step() {
 if command -v xcode-select > /dev/null; then
     pngcrush=$(xcode-select --print-path)/Platforms/iPhoneOS.platform/Developer/usr/bin/pngcrush
     flags='-q -rem alla -reduce -iphone'
+elif command -v pngcrush > /dev/null; then
+    pngcrush='pngcrush'
+    flags='-q -rem alla -reduce'
 else
-    pngcrush='cp'
+    echo "couldn't find pngcrush"
+    exit 1
 fi
 
 if grep CgBI "${png}" &>/dev/null; then
