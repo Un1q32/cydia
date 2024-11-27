@@ -46,6 +46,7 @@ libs += -framework CoreGraphics
 libs += -framework Foundation
 libs += -framework GraphicsServices
 libs += -framework IOKit
+libs += -framework JavaScriptCore
 libs += -framework QuartzCore
 libs += -framework SpringBoardServices
 libs += -framework SystemConfiguration

@@ -38,8 +38,6 @@ extern NSString * const kCAFilterNearest;
 
 #define lprintf(args...) fprintf(stderr, args)
 
-JSValueRef (*$JSObjectCallAsFunction)(JSContextRef, JSObjectRef, JSObjectRef, size_t, const JSValueRef[], JSValueRef *);
-
 // XXX: centralize these special class things to some file or mechanism?
 static Class $MFMailComposeViewController;
 
@@ -139,14 +137,6 @@ float CYScrollViewDecelerationRateNormal;
 
 + (void) _initialize {
     [WebPreferences _setInitialDefaultTextEncodingToSystemEncoding];
-
-    void *js(NULL);
-    if (js == NULL)
-        js = dlopen("/System/Library/Frameworks/JavaScriptCore.framework/JavaScriptCore", RTLD_GLOBAL | RTLD_LAZY);
-    if (js == NULL)
-        js = dlopen("/System/Library/PrivateFrameworks/JavaScriptCore.framework/JavaScriptCore", RTLD_GLOBAL | RTLD_LAZY);
-    if (js != NULL)
-        $JSObjectCallAsFunction = reinterpret_cast<JSValueRef (*)(JSContextRef, JSObjectRef, JSObjectRef, size_t, const JSValueRef[], JSValueRef *)>(dlsym(js, "JSObjectCallAsFunction"));
 
     dlopen("/System/Library/Frameworks/MessageUI.framework/MessageUI", RTLD_GLOBAL | RTLD_LAZY);
     $MFMailComposeViewController = objc_getClass("MFMailComposeViewController");
@@ -1004,8 +994,7 @@ float CYScrollViewDecelerationRateNormal;
 
     JSGlobalContextRef context([frame globalContext]);
     JSObjectRef object([function JSObject]);
-    if ($JSObjectCallAsFunction != NULL)
-        ($JSObjectCallAsFunction)(context, object, NULL, 0, NULL, NULL);
+    JSObjectCallAsFunction(context, object, NULL, 0, NULL, NULL);
 }
 
 - (void) reloadButtonClicked {
