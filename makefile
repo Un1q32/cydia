@@ -37,6 +37,9 @@ xflags += -std=c++03
 link += -Lsysroot/usr/lib
 link += -multiply_defined suppress
 link += -stdlib=libstdc++
+ifeq ($(shell uname -s),Linux)
+link += -fuse-ld=ld64 -mlinker-version=951.9
+endif
 
 libs += -framework CoreFoundation
 libs += -framework CoreGraphics
@@ -63,9 +66,6 @@ backrow += -FAppleTV -framework BackRow -framework AppleTV
 version := $(shell ./version.sh)
 
 cycc = $(gxx) -o $@ -target armv6-apple-ios3 -isysroot $(sdk) -idirafter /usr/include -F{sysroot,}/Library/Frameworks
-ifeq ($(shell uname -s),Linux)
-cycc += -fuse-ld=ld64 -mlinker-version=951.9
-endif
 
 dirs := Menes CyteKit Cydia SDURLCache
 
