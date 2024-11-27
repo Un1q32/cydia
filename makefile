@@ -62,7 +62,7 @@ version := $(shell ./version.sh)
 
 cycc = $(gxx) -o $@ -target armv6-apple-ios3 -isysroot $(sdk) -idirafter /usr/include -F{sysroot,}/Library/Frameworks
 ifeq ($(shell uname -s),Linux)
-cycc += -fuse-ld=ld64
+cycc += -fuse-ld=ld64 -mlinker-version=951.9
 endif
 
 dirs := Menes CyteKit Cydia SDURLCache
