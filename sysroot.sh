@@ -32,6 +32,7 @@ tar -xf macsdk.tar.xz
 mv MacOS*.sdk macsdk
 macsdk="$PWD/macsdk"
 rm macsdk.tar.xz iossdk.tar.lzma
+ln -s "$PWD/macsdk/usr/include/sys/reboot.h" iossdk/usr/include/sys
 rm -rf sysroot
 mkdir sysroot
 cd sysroot
