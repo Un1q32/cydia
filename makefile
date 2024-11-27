@@ -35,6 +35,7 @@ xflags += -std=c++03
 
 link += -Lsysroot/usr/lib
 link += -multiply_defined suppress
+link += -stdlib=libstdc++
 
 libs += -framework CoreFoundation
 libs += -framework CoreGraphics
