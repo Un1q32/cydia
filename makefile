@@ -1,4 +1,4 @@
-gxx := clang++ -stdlib=libstdc++
+gxx := clang++
 
 flags := 
 link := 
@@ -13,7 +13,8 @@ flags += -I. -isystem sysroot/usr/include
 flags += -fmessage-length=0
 flags += -g0 -O2
 flags += -fvisibility=hidden
-
+flags += -DkCFCoreFoundationVersionNumber_iPhoneOS_3_2=478.61
+flags += -DkCFCoreFoundationVersionNumber_iPhoneOS_3_0=478.47
 flags += -Wall
 
 ifeq ($(gcc),)
@@ -29,6 +30,8 @@ flags += -Wno-deprecated-declarations
 xflags :=
 xflags += -fobjc-call-cxx-cdtors
 xflags += -fvisibility-inlines-hidden
+xflags += -stdlib=libstdc++
+xflags += -std=c++03
 
 link += -Lsysroot/usr/lib
 link += -multiply_defined suppress
