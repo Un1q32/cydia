@@ -39,10 +39,10 @@ done
 
 rm -rf iossdk macsdk
 wget -O iossdk.tar.xz 'https://raw.githubusercontent.com/Un1q32/iphoneports-sdk/36526496ef7adc247d611f2c704f04f214f4e3a8/iPhoneOS3.2.sdk.tar.xz'
-gtar -xf iossdk.tar.xz
+tar -xf iossdk.tar.xz
 mv iPhoneOS*.sdk iossdk
 wget -O macsdk.tar.xz 'https://github.com/phracker/MacOSX-SDKs/releases/download/11.3/MacOSX10.6.sdk.tar.xz'
-gtar -xf macsdk.tar.xz
+tar -xf macsdk.tar.xz
 mv MacOS*.sdk macsdk
 macsdk="$PWD/macsdk"
 rm macsdk.tar.xz iossdk.tar.xz
@@ -79,7 +79,7 @@ function extract() {
     fi
 
     ls -la data.tar
-    gtar -xf ./data.tar
+    tar -xf ./data.tar
     rm -f data.tar
 }
 
