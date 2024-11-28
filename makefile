@@ -9,7 +9,7 @@ flags :=
 link := 
 libs := 
 
-dpkg := dpkg-deb -Zgzip
+dpkg := dpkg-deb --root-owner-group -Zgzip
 
 sdk := $(shell pwd)/iossdk
 
@@ -145,7 +145,7 @@ postinst: postinst.mm Sources.mm Sources.h CyteKit/stringWithUTF8Bytes.mm CyteKi
 	@ldid -T0 -S $@
 
 debs/cydia_$(version)_iphoneos-arm.deb: MobileCydia preinst postinst cfversion $(images) $(shell find MobileCydia.app) cydia.control Library/firmware.sh Library/startup
-	sudo rm -rf _
+	rm -rf _
 	mkdir -p _/var/lib/cydia
 	
 	mkdir -p _/etc/apt
@@ -181,9 +181,7 @@ debs/cydia_$(version)_iphoneos-arm.deb: MobileCydia preinst postinst cfversion $
 	./control.sh cydia.control _ >_/DEBIAN/control
 	cp -a preinst postinst _/DEBIAN/
 	
-	sudo chown -R 0 _
-	sudo chgrp -R 0 _
-	sudo chmod 6755 _/Applications/Cydia.app/MobileCydia
+	chmod 6755 _/Applications/Cydia.app/MobileCydia
 	
 	mkdir -p debs
 	ln -sf debs/cydia_$(version)_iphoneos-arm.deb Cydia.deb
