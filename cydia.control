@@ -11,5 +11,4 @@ Pre-Depends: debianutils
 Provides: bigbossbetarepo, cydia-sources, cydia, cydia-lproj
 Description: graphical iPhone front-end for APT
 Author: Jay Freeman (saurik) <saurik@saurik.com>
-Depiction: http://cydia.saurik.com/info/cydia/
 Tag: purpose::uikit, cydia::essential, role::enduser
