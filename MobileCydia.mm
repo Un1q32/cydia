@@ -270,12 +270,13 @@ static bool IsReachable(const char *name) {
 static const NSUInteger UIViewAutoresizingFlexibleBoth(UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight);
 
 static _finline NSString *CydiaURL(NSString *path) {
-    char page[25];
-    page[0] = 'h'; page[1] = 't'; page[2] = 't'; page[3] = 'p'; page[4] = ':';
-    page[5] = '/'; page[6] = '/'; page[7] = 'c'; page[8] = 'y'; page[9] = 'd';
-    page[10] = 'i'; page[11] = 'a'; page[12] = '.'; page[13] = 's'; page[14] = 'a';
-    page[15] = 'u'; page[16] = 'r'; page[17] = 'i'; page[18] = 'k'; page[19] = '.';
-    page[20] = 'c'; page[21] = 'o'; page[22] = 'm'; page[23] = '/'; page[24] = '\0';
+    char page[26];
+    page[0] = 'h'; page[1] = 't'; page[2] = 't'; page[3] = 'p'; page[4] = 's';
+    page[5] = ':'; page[6] = '/'; page[7] = '/'; page[8] = 'c'; page[9] = 'y';
+    page[10] = 'd'; page[11] = 'i'; page[12] = 'a'; page[13] = '.'; page[14] = 's';
+    page[15] = 'a'; page[16] = 'u'; page[17] = 'r'; page[18] = 'i'; page[19] = 'k';
+    page[20] = '.'; page[21] = 'c'; page[22] = 'o'; page[23] = 'm'; page[24] = '/';
+    page[25] = '\0';
     return [[NSString stringWithUTF8String:page] stringByAppendingString:path];
 }
 
@@ -4576,7 +4577,7 @@ static _H<NSMutableSet> Diversions_;
 @implementation NSURL (CydiaSecure)
 
 - (bool) isCydiaSecure {
-    if (([[[self scheme] lowercaseString] isEqualToString:@"https"]) || ([[[self scheme] lowercaseString] isEqualToString:@"http"]))
+    if ([[[self scheme] lowercaseString] isEqualToString:@"https"])
         return true;
 
     @synchronized (HostConfig_) {
@@ -4622,7 +4623,7 @@ static _H<NSMutableSet> Diversions_;
     @synchronized (HostConfig_) {
         if ([scheme isEqualToString:@"file"])
             bridged = true;
-        else if (([scheme isEqualToString:@"https"]) || ([scheme isEqualToString:@"http"]))
+        else if ([scheme isEqualToString:@"https"])
             if ([BridgedHosts_ containsObject:[url host]])
                 bridged = true;
     }
@@ -4653,7 +4654,7 @@ static _H<NSMutableSet> Diversions_;
     NSString *href([url absoluteString]);
     NSString *host([url host]);
 
-    if ([href hasPrefix:@"http://cydia.saurik.com/TSS/"]) {
+    if ([href hasPrefix:@"https://cydia.saurik.com/TSS/"]) {
         if (NSString *agent = [copy valueForHTTPHeaderField:@"X-User-Agent"]) {
             [copy setValue:agent forHTTPHeaderField:@"User-Agent"];
             [copy setValue:nil forHTTPHeaderField:@"X-User-Agent"];
