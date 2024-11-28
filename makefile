@@ -5,7 +5,7 @@ else
 strip := cctools-strip
 endif
 
-flags := 
+flags := $(extraflags)
 link := $(extralink)
 libs := 
 
