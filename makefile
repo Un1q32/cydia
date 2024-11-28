@@ -39,7 +39,6 @@ xflags += -std=c++03
 
 link += -Lsysroot/var/usr/lib
 link += -Lsysroot/usr/lib
-link += -multiply_defined suppress
 link += -stdlib=libstdc++
 ifeq ($(shell uname -s),Linux)
 link += -fuse-ld=ld64 -mlinker-version=951.9
