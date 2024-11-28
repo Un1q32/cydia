@@ -302,10 +302,11 @@ static _finline NSString *CydiaURL(NSString *path) {
 static void ReapZombie(pid_t pid) {
     int status;
   wait:
-    if (waitpid(pid, &status, 0) == -1)
+    if (waitpid(pid, &status, 0) == -1) {
         if (errno == EINTR)
             goto wait;
         else _assert(false);
+    }
 }
 
 static _finline void UpdateExternalStatus(uint64_t newStatus) {
@@ -2055,11 +2056,12 @@ uint32_t PackagePrefixRadix(Package *self, void *context) {
                 data[i] |= 0x20;
     }
 
-    if (offset == 0)
+    if (offset == 0) {
         if (data[0] == '@')
             data[0] = 0x7f;
         else
             data[0] = (data[0] & 0x1f) | "\x80\x00\xc0\x40"[data[0] >> 6];
+    }
 
     /* XXX: ntohl may be more honest */
     return OSSwapInt32(*reinterpret_cast<uint32_t *>(data));
@@ -2840,7 +2842,7 @@ struct PackageNameOrdering :
 
         bool repository = [[self section] isEqualToString:@"Repositories"];
 
-        if (NSArray *files = [self files])
+        if (NSArray *files = [self files]) {
             for (NSString *file in files)
                 if (!cydia && [file isEqualToString:@"/Applications/Cydia.app"])
                     cydia = true;
@@ -2850,6 +2852,7 @@ struct PackageNameOrdering :
                     _private = true;
                 else if (!stash && [file isEqualToString:@"/var/stash"])
                     stash = true;
+        }
 
         /* XXX: this is not sensitive enough. only some folders are valid. */
         if (cydia && !repository)
@@ -5587,12 +5590,10 @@ bool DepSubstrate(const pkgCache::VerIterator &iterator) {
         commercial_ = [package isCommercial];
 
         NSString *label = nil;
-        bool trusted = false;
 
-        if (source != nil) {
+        if (source != nil)
             label = [source label];
-            trusted = [source trusted];
-        } else if ([[package id] isEqualToString:@"firmware"])
+        else if ([[package id] isEqualToString:@"firmware"])
             label = UCLocalize("APPLE");
         else
             label = [NSString stringWithFormat:UCLocalize("SLASH_DELIMITED"), UCLocalize("UNKNOWN"), UCLocalize("LOCAL")];
