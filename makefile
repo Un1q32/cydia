@@ -21,15 +21,10 @@ flags += -fvisibility=hidden
 flags += -DkCFCoreFoundationVersionNumber_iPhoneOS_3_2=478.61
 flags += -Wall
 
-ifeq ($(gcc),)
 flags += -Wno-unknown-warning-option
 flags += -Wno-logical-op-parentheses
-else
-flags += -fobjc-exceptions
-flags += -fno-guess-branch-probability
-endif
-
 flags += -Wno-deprecated-declarations
+flags += -Wno-deprecated
 
 xflags :=
 xflags += -fobjc-call-cxx-cdtors
