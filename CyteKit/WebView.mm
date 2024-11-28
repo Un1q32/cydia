@@ -120,11 +120,8 @@
 - (void) dealloc {
     if (kCFCoreFoundationVersionNumber < kCFCoreFoundationVersionNumber_iPhoneOS_3_0) {
         UIWebViewInternal *&_internal(MSHookIvar<UIWebViewInternal *>(self, "_internal"));
-        if (&_internal != NULL) {
-            UIWebViewWebViewDelegate *&webViewDelegate(MSHookIvar<UIWebViewWebViewDelegate *>(_internal, "webViewDelegate"));
-            if (&webViewDelegate != NULL)
-                [webViewDelegate _clearUIWebView];
-        }
+        UIWebViewWebViewDelegate *&webViewDelegate(MSHookIvar<UIWebViewWebViewDelegate *>(_internal, "webViewDelegate"));
+        [webViewDelegate _clearUIWebView];
     }
 
     [super dealloc];
