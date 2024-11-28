@@ -31,7 +31,7 @@ wget -O macsdk.tar.xz 'https://github.com/phracker/MacOSX-SDKs/releases/download
 tar -xf macsdk.tar.xz
 mv MacOS*.sdk macsdk
 macsdk="$PWD/macsdk"
-rm macsdk.tar.xz iossdk.tar.lzma
+rm macsdk.tar.xz iossdk.tar.xz
 rm -rf sysroot
 mkdir sysroot
 cd sysroot
