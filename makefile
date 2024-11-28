@@ -6,7 +6,7 @@ strip := cctools-strip
 endif
 
 flags := 
-link := 
+link := $(extralink)
 libs := 
 
 dpkg := dpkg-deb --root-owner-group -Zgzip
@@ -125,7 +125,7 @@ sysroot: sysroot.sh
 
 MobileCydia: sysroot $(object) entitlements.xml
 	@echo "[link] $(object:Objects/%=%)"
-	@$(cycc) $(filter %.o,$^) $(flags) $(link) $(libs) $(uikit) $(extralink)
+	@$(cycc) $(filter %.o,$^) $(flags) $(link) $(libs) $(uikit)
 	@mkdir -p bins
 	@cp -a $@ bins/$@-$(version)
 	@echo "[strp] $@"
