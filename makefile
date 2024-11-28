@@ -21,6 +21,7 @@ flags += -fvisibility=hidden
 flags += -DkCFCoreFoundationVersionNumber_iPhoneOS_3_2=478.61
 flags += -Wall
 
+flags += -Wno-objc-protocol-method-implementation
 flags += -Wno-vla-extension
 flags += -Wno-c++11-extensions
 flags += -Wno-deprecated
