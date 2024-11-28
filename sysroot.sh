@@ -24,8 +24,8 @@ if gtar --help | grep bsdtar &>/dev/null; then
 fi
 
 rm -rf iossdk macsdk
-wget -O iossdk.tar.lzma 'https://raw.githubusercontent.com/Un1q32/iphoneports-sdk/36526496ef7adc247d611f2c704f04f214f4e3a8/iPhoneOS3.2.sdk.tar.xz'
-tar -xf iossdk.tar.lzma
+wget -O iossdk.tar.xz 'https://raw.githubusercontent.com/Un1q32/iphoneports-sdk/36526496ef7adc247d611f2c704f04f214f4e3a8/iPhoneOS3.2.sdk.tar.xz'
+tar -xf iossdk.tar.xz
 mv iPhoneOS*.sdk iossdk
 wget -O macsdk.tar.xz 'https://github.com/phracker/MacOSX-SDKs/releases/download/11.3/MacOSX10.6.sdk.tar.xz'
 tar -xf macsdk.tar.xz
