@@ -22,6 +22,7 @@ flags += -DkCFCoreFoundationVersionNumber_iPhoneOS_3_2=478.61
 flags += -Wall
 
 flags += -Wno-vla-extension
+flags += -Wno-c++11-extensions
 flags += -Wno-deprecated
 
 xflags :=
@@ -50,7 +51,7 @@ libs += -framework WebCore
 libs += -framework WebKit
 
 libs += -lapt-pkg
-libs += -lpcre
+libs += -licucore
 
 uikit := 
 uikit += -framework UIKit
@@ -133,7 +134,7 @@ cfversion: cfversion.c
 	@ldid -T0 -S $@
 
 postinst: postinst.mm Sources.mm Sources.h CyteKit/stringWithUTF8Bytes.mm CyteKit/stringWithUTF8Bytes.h CyteKit/UCPlatform.h
-	$(cycc) $(filter %.mm,$^) $(flags) $(link) -framework CoreFoundation -framework Foundation -framework UIKit -lpcre
+	$(cycc) $(filter %.mm,$^) $(flags) $(link) -framework CoreFoundation -framework Foundation -framework UIKit
 	@ldid -T0 -S $@
 
 debs/cydia_$(version)_iphoneos-arm.deb: MobileCydia preinst postinst cfversion $(images) $(shell find MobileCydia.app) cydia.control Library/firmware.sh Library/startup

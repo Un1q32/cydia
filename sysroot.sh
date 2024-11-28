@@ -85,13 +85,10 @@ function extract() {
 
 declare -A urls
 
-ippcommit=e40e1319603390c9aeaea73759ce4df6d7322c82
-
 urls[apt7]=http://apt.saurik.com/debs/apt7_0.7.25.3-9_iphoneos-arm.deb
 urls[apt7-lib]=http://apt.saurik.com/debs/apt7-lib_0.7.25.3-16_iphoneos-arm.deb
 urls[coreutils]=http://apt.saurik.com/debs/coreutils_8.12-13_iphoneos-arm.deb
 urls[mobilesubstrate]=http://apt.saurik.com/debs/mobilesubstrate_0.9.6301_iphoneos-arm.deb
-urls[pcre]=https://raw.githubusercontent.com/Un1q32/Un1q32.github.io/$ippcommit/debs/pcre.deb
 
 if [[ 0 ]]; then
     wget -qO- "${repository}dists/${distribution}/${component}/binary-${architecture}/Packages.bz2" | bzcat | {
