@@ -151,6 +151,8 @@ else
     ')
 fi
 
+ln -s "${macsdk}"/usr/include/dispatch
+
 for framework in ApplicationServices CoreServices IOKit IOSurface JavaScriptCore WebKit; do
     ln -s "${macsdk}"/System/Library/Frameworks/"${framework}".framework/Headers "${framework}"
 done

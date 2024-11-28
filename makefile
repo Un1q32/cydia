@@ -19,7 +19,6 @@ flags += -fmessage-length=0
 flags += -g0 -O2
 flags += -fvisibility=hidden
 flags += -DkCFCoreFoundationVersionNumber_iPhoneOS_3_2=478.61
-flags += -DkCFCoreFoundationVersionNumber_iPhoneOS_3_0=478.47
 flags += -Wall
 
 ifeq ($(gcc),)
