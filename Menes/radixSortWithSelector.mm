@@ -77,7 +77,7 @@ struct RadixItem_ {
         for (size_t i(0); i != count; ++i) {
             uint32_t key(lhs[i].key);
             key >>= pass * bits;
-            key &= _not(uint32_t) >> width - bits;
+            key &= _not(uint32_t) >> (width - bits);
             ++hist[key];
         }
 
@@ -91,7 +91,7 @@ struct RadixItem_ {
         for (size_t i(0); i != count; ++i) {
             uint32_t key(lhs[i].key);
             key >>= pass * bits;
-            key &= _not(uint32_t) >> width - bits;
+            key &= _not(uint32_t) >> (width - bits);
             rhs[hist[key]++] = lhs[i];
         }
 
