@@ -6203,15 +6203,8 @@ bool DepSubstrate(const pkgCache::VerIterator &iterator) {
 }
 
 - (void) getKeyboardCurve:(UIViewAnimationCurve *)curve duration:(NSTimeInterval *)duration forNotification:(NSNotification *)notification {
-    if (&UIKeyboardAnimationCurveUserInfoKey == NULL)
-        *curve = UIViewAnimationCurveEaseInOut;
-    else
-        [[[notification userInfo] objectForKey:UIKeyboardAnimationCurveUserInfoKey] getValue:curve];
-
-    if (&UIKeyboardAnimationDurationUserInfoKey == NULL)
-        *duration = 0.3;
-    else
-        [[[notification userInfo] objectForKey:UIKeyboardAnimationDurationUserInfoKey] getValue:duration];
+    [[[notification userInfo] objectForKey:UIKeyboardAnimationCurveUserInfoKey] getValue:curve];
+    [[[notification userInfo] objectForKey:UIKeyboardAnimationDurationUserInfoKey] getValue:duration];
 }
 
 - (void) keyboardWillShow:(NSNotification *)notification {
