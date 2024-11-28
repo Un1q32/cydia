@@ -1,7 +1,26 @@
 #!/usr/bin/env bash
 
+if command -v gtar &> /dev/null; then
+    tar=gtar
+else
+    tarversion="$(tar --version 2>/dev/null)"
+    case $tarversion in
+        *GNU*)
+            tar=tar
+        ;;
+        *)
+            echo "Can't find GNU tar, please install GNU tar."
+            exit 1
+        ;;
+    esac
+fi
+
+gtar() {
+    "$tar" "$@"
+}
+
 if [ "${BASH_VERSION%%.*}" -lt 4 ]; then
-    echo "bash 4.0 or newer required. Please read compiling.txt." 1>&2
+    echo "bash 4.0 or newer required." 1>&2
     exit 1
 fi
 
@@ -12,16 +31,11 @@ shopt -s extglob
 shopt -s nullglob
 
 for command in unlzma wget; do
-    if ! which "${command}" &>/dev/null; then
-        echo "Cannot run \`${command}\`. Please read compiling.txt." 1>&2
+    if ! command -v "${command}" &>/dev/null; then
+        echo "Missing dependency: ${command}." 1>&2
         exit 1
     fi
 done
-
-if gtar --help | grep bsdtar &>/dev/null; then
-    echo "Running \`gtar\` is bsdtar :(. Please read compiling.txt." 1>&2
-    exit 1
-fi
 
 rm -rf iossdk macsdk
 wget -O iossdk.tar.xz 'https://raw.githubusercontent.com/Un1q32/iphoneports-sdk/36526496ef7adc247d611f2c704f04f214f4e3a8/iPhoneOS3.2.sdk.tar.xz'
@@ -71,13 +85,15 @@ function extract() {
 
 declare -A urls
 
+ippcommit=e40e1319603390c9aeaea73759ce4df6d7322c82
+
 urls[apr]=http://apt.saurik.com/debs/apr_1.3.3-4_iphoneos-arm.deb
 urls[apr-lib]=http://apt.saurik.com/debs/apr-lib_1.3.3-2_iphoneos-arm.deb
 urls[apt7]=http://apt.saurik.com/debs/apt7_0.7.25.3-9_iphoneos-arm.deb
 urls[apt7-lib]=http://apt.saurik.com/debs/apt7-lib_0.7.25.3-16_iphoneos-arm.deb
 urls[coreutils]=http://apt.saurik.com/debs/coreutils_8.12-13_iphoneos-arm.deb
 urls[mobilesubstrate]=http://apt.saurik.com/debs/mobilesubstrate_0.9.6301_iphoneos-arm.deb
-urls[pcre]=http://apt.saurik.com/debs/pcre_8.30-6_iphoneos-arm.deb
+urls[pcre]=https://raw.githubusercontent.com/Un1q32/Un1q32.github.io/$ippcommit/debs/pcre.deb
 
 if [[ 0 ]]; then
     wget -qO- "${repository}dists/${distribution}/${component}/binary-${architecture}/Packages.bz2" | bzcat | {

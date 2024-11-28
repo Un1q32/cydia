@@ -5,8 +5,8 @@ else
 strip := cctools-strip
 endif
 
-flags := $(extraflags)
-link := $(extralink)
+flags :=
+link :=
 libs := 
 
 dpkg := dpkg-deb --root-owner-group -Zgzip
@@ -14,7 +14,7 @@ dpkg := dpkg-deb --root-owner-group -Zgzip
 sdk := $(shell pwd)/iossdk
 
 flags += -F$(sdk)/System/Library/PrivateFrameworks
-flags += -I. -isystem sysroot/usr/include
+flags += -I. -isystem sysroot/var/usr/include -isystem sysroot/usr/include
 flags += -fmessage-length=0
 flags += -g0 -O2
 flags += -fvisibility=hidden
@@ -37,6 +37,7 @@ xflags += -fvisibility-inlines-hidden
 xflags += -stdlib=libstdc++
 xflags += -std=c++03
 
+link += -Lsysroot/var/usr/lib
 link += -Lsysroot/usr/lib
 link += -multiply_defined suppress
 link += -stdlib=libstdc++
