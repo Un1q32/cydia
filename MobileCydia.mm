@@ -80,8 +80,6 @@
 #include <apt-pkg/strutl.h>
 #include <apt-pkg/tagfile.h>
 
-#include <apr-1/apr_pools.h>
-
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/sysctl.h>
@@ -541,14 +539,14 @@ class CYString {
             cache_ = reinterpret_cast<CFStringRef>(CFRetain(rhs.cache_));
     }
 
-    void copy(apr_pool_t *pool) {
-        char *temp(reinterpret_cast<char *>(apr_palloc(pool, size_ + 1)));
+    void copy(CYPool *pool) {
+        char *temp(pool->malloc<char>(size_ + 1));
         memcpy(temp, data_, size_);
         temp[size_] = '\0';
         data_ = temp;
     }
 
-    void set(apr_pool_t *pool, const char *data, size_t size) {
+    void set(CYPool *pool, const char *data, size_t size) {
         if (size == 0)
             clear();
         else {
@@ -562,11 +560,11 @@ class CYString {
         }
     }
 
-    _finline void set(apr_pool_t *pool, const char *data) {
+    _finline void set(CYPool *pool, const char *data) {
         set(pool, data, data == NULL ? 0 : strlen(data));
     }
 
-    _finline void set(apr_pool_t *pool, const std::string &rhs) {
+    _finline void set(CYPool *pool, const std::string &rhs) {
         set(pool, rhs.data(), rhs.size());
     }
 
@@ -985,7 +983,7 @@ typedef std::map< unsigned long, _H<Source> > SourceMap;
 
 @interface Database : NSObject {
     NSZone *zone_;
-    apr_pool_t *pool_;
+    CYPool pool_;
 
     unsigned era_;
 
@@ -1322,7 +1320,7 @@ static void PackageImport(const void *key, const void *value, void *context) {
     BOOL trusted_;
 }
 
-- (Source *) initWithMetaIndex:(metaIndex *)index forDatabase:(Database *)database inPool:(apr_pool_t *)pool;
+- (Source *) initWithMetaIndex:(metaIndex *)index forDatabase:(Database *)database inPool:(CYPool *)pool;
 
 - (NSComparisonResult) compareByName:(Source *)source;
 
@@ -1422,7 +1420,7 @@ static void PackageImport(const void *key, const void *value, void *context) {
     return index_;
 }
 
-- (void) setMetaIndex:(metaIndex *)index inPool:(apr_pool_t *)pool {
+- (void) setMetaIndex:(metaIndex *)index inPool:(CYPool *)pool {
     [self _clear];
 
     trusted_ = index->IsTrusted();
@@ -1482,7 +1480,7 @@ static void PackageImport(const void *key, const void *value, void *context) {
         authority_ = [url path];
 }
 
-- (Source *) initWithMetaIndex:(metaIndex *)index forDatabase:(Database *)database inPool:(apr_pool_t *)pool {
+- (Source *) initWithMetaIndex:(metaIndex *)index forDatabase:(Database *)database inPool:(CYPool *)pool {
     if ((self = [super init]) != nil) {
         era_ = [database era];
         database_ = database;
@@ -1853,7 +1851,7 @@ struct ParsedPackage {
     uint32_t ignored_ : 1;
     uint32_t pooled_ : 1;
 
-    apr_pool_t *pool_;
+    CYPool *pool_;
 
     uint32_t rank_;
 
@@ -1880,8 +1878,8 @@ struct ParsedPackage {
     _H<NSMutableArray> tags_;
 }
 
-- (Package *) initWithVersion:(pkgCache::VerIterator)version withZone:(NSZone *)zone inPool:(apr_pool_t *)pool database:(Database *)database;
-+ (Package *) packageWithIterator:(pkgCache::PkgIterator)iterator withZone:(NSZone *)zone inPool:(apr_pool_t *)pool database:(Database *)database;
+- (Package *) initWithVersion:(pkgCache::VerIterator)version withZone:(NSZone *)zone inPool:(CYPool *)pool database:(Database *)database;
++ (Package *) packageWithIterator:(pkgCache::PkgIterator)iterator withZone:(NSZone *)zone inPool:(CYPool *)pool database:(Database *)database;
 
 - (pkgCache::PkgIterator) iterator;
 - (void) parse;
@@ -2100,7 +2098,7 @@ struct PackageNameOrdering :
 
 - (void) dealloc {
     if (!pooled_)
-        apr_pool_destroy(pool_);
+        delete pool_;
     if (parsed_ != NULL)
         delete parsed_;
     [super dealloc];
@@ -2266,11 +2264,11 @@ struct PackageNameOrdering :
     _end
 } }
 
-- (Package *) initWithVersion:(pkgCache::VerIterator)version withZone:(NSZone *)zone inPool:(apr_pool_t *)pool database:(Database *)database {
+- (Package *) initWithVersion:(pkgCache::VerIterator)version withZone:(NSZone *)zone inPool:(CYPool *)pool database:(Database *)database {
     if ((self = [super init]) != nil) {
     _profile(Package$initWithVersion)
         if (pool == NULL)
-            apr_pool_create(&pool_, NULL);
+            pool_ = new CYPool();
         else {
             pool_ = pool;
             pooled_ = true;
@@ -2383,7 +2381,7 @@ struct PackageNameOrdering :
     _end } return self;
 }
 
-+ (Package *) packageWithIterator:(pkgCache::PkgIterator)iterator withZone:(NSZone *)zone inPool:(apr_pool_t *)pool database:(Database *)database {
++ (Package *) packageWithIterator:(pkgCache::PkgIterator)iterator withZone:(NSZone *)zone inPool:(CYPool *)pool database:(Database *)database {
     pkgCache::VerIterator version;
 
     _profile(Package$packageWithIterator$GetCandidateVer)
@@ -3246,7 +3244,6 @@ class CydiaLogCleaner :
     // XXX: actually implement this thing
     _assert(false);
     [self releasePackages];
-    apr_pool_destroy(pool_);
     NSRecycleZone(zone_);
     [super dealloc];
 }
@@ -3377,7 +3374,6 @@ class CydiaLogCleaner :
         lock_ = NULL;
 
         zone_ = NSCreateZone(1024 * 1024, 256 * 1024, NO);
-        apr_pool_create(&pool_, NULL);
 
         size_t capacity(MetaFile_->active_);
         if (capacity == 0)
@@ -3527,7 +3523,8 @@ class CydiaLogCleaner :
 
     cache_.Close();
 
-    apr_pool_clear(pool_);
+    pool_.~CYPool();
+    new (&pool_) CYPool();
 
     NSRecycleZone(zone_);
     zone_ = NSCreateZone(1024 * 1024, 256 * 1024, NO);
@@ -3546,7 +3543,7 @@ class CydiaLogCleaner :
         return;
 
     for (pkgSourceList::const_iterator source = list_->begin(); source != list_->end(); ++source) {
-        Source *object([[[Source alloc] initWithMetaIndex:*source forDatabase:self inPool:pool_] autorelease]);
+        Source *object([[[Source alloc] initWithMetaIndex:*source forDatabase:self inPool:&pool_] autorelease]);
         [sourceList_ addObject:object];
     }
 
@@ -3636,7 +3633,7 @@ class CydiaLogCleaner :
         _trace();
 
         for (pkgCache::PkgIterator iterator = cache_->PkgBegin(); !iterator.end(); ++iterator)
-            if (Package *package = [Package packageWithIterator:iterator withZone:zone_ inPool:pool_ database:self])
+            if (Package *package = [Package packageWithIterator:iterator withZone:zone_ inPool:&pool_ database:self])
                 //packages.push_back(package);
                 CFArrayAppendValue(packages_, CFRetain(package));
 
@@ -10586,9 +10583,6 @@ int main(int argc, char *argv[]) {
         std::setlocale(LC_ALL, lang);
     }
     /* }}} */
-
-    apr_app_initialize(&argc, const_cast<const char * const **>(&argv), NULL);
-
     /* Parse Arguments {{{ */
     bool substrate(false);
 

@@ -23,6 +23,7 @@
 #define Menes_Menes_H
 
 #include "Menes/ObjectHandle.h"
+#include "Menes/Pooling.hpp"
 
 #include "Menes/invocationWithSelector.h"
 #include "Menes/radixSortWithSelector.h"

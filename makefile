@@ -49,7 +49,6 @@ libs += -framework SystemConfiguration
 libs += -framework WebCore
 libs += -framework WebKit
 
-libs += -lapr-1
 libs += -lapt-pkg
 libs += -lpcre
 

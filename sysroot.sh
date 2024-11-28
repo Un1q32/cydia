@@ -87,8 +87,6 @@ declare -A urls
 
 ippcommit=e40e1319603390c9aeaea73759ce4df6d7322c82
 
-urls[apr]=http://apt.saurik.com/debs/apr_1.3.3-4_iphoneos-arm.deb
-urls[apr-lib]=http://apt.saurik.com/debs/apr-lib_1.3.3-2_iphoneos-arm.deb
 urls[apt7]=http://apt.saurik.com/debs/apt7_0.7.25.3-9_iphoneos-arm.deb
 urls[apt7-lib]=http://apt.saurik.com/debs/apt7-lib_0.7.25.3-16_iphoneos-arm.deb
 urls[coreutils]=http://apt.saurik.com/debs/coreutils_8.12-13_iphoneos-arm.deb
