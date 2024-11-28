@@ -5814,7 +5814,7 @@ bool DepSubstrate(const pkgCache::VerIterator &iterator) {
         section_ = [section localized];
 
         name_  = section_ == nil || [section_ length] == 0 ? UCLocalize("NO_SECTION") : (NSString *) section_;
-        count_ = [NSString stringWithFormat:@"%d", [section count]];
+        count_ = [NSString stringWithFormat:@"%lu", [section count]];
 
         if (editing_)
             [switch_ setOn:(isSectionVisible(basic_) ? 1 : 0) animated:NO];

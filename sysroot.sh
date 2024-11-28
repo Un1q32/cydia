@@ -38,7 +38,7 @@ for command in unlzma wget; do
 done
 
 rm -rf iossdk macsdk
-wget -O iossdk.tar.xz 'https://raw.githubusercontent.com/Un1q32/iphoneports-sdk/36526496ef7adc247d611f2c704f04f214f4e3a8/iPhoneOS3.2.sdk.tar.xz'
+wget -O iossdk.tar.xz 'https://raw.githubusercontent.com/Un1q32/iphoneports-sdk/26f5f1ea9c1faf68e11d7adde51c60bc62ca305a/iPhoneOS5.1.sdk.tar.xz'
 gtar -xf iossdk.tar.xz
 mv iPhoneOS*.sdk iossdk
 wget -O macsdk.tar.xz 'https://github.com/phracker/MacOSX-SDKs/releases/download/11.3/MacOSX10.6.sdk.tar.xz'
@@ -167,7 +167,8 @@ else
     ')
 fi
 
-ln -s "${macsdk}"/usr/include/dispatch
+mkdir sys
+ln -s "${macsdk}"/usr/include/sys/reboot.h sys
 
 for framework in ApplicationServices CoreServices IOKit IOSurface JavaScriptCore WebKit; do
     ln -s "${macsdk}"/System/Library/Frameworks/"${framework}".framework/Headers "${framework}"
