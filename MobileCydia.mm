@@ -2831,7 +2831,7 @@ struct PackageNameOrdering :
             (name[i] < 'A' || name[i] > 'Z') &&
             (name[i] < 'a' || name[i] > 'z') &&
             (name[i] < '0' || name[i] > '9') &&
-            (i == 0 || name[i] != '+' && name[i] != '-' && name[i] != '.')
+            (i == 0 || (name[i] != '+' && name[i] != '-' && name[i] != '.'))
         ) goto invalid;
 
     if (strcmp(name, "cydia") != 0) {
@@ -3101,7 +3101,7 @@ struct PackageNameOrdering :
 }
 
 - (bool) isInstalledAndUnfiltered:(NSNumber *)number {
-    return ![self uninstalled] && (![number boolValue] && role_ != 7 || [self unfiltered]);
+    return ![self uninstalled] && ((![number boolValue] && role_ != 7) || [self unfiltered]);
 }
 
 - (bool) isVisibleInSection:(NSString *)name {
@@ -3109,7 +3109,7 @@ struct PackageNameOrdering :
 
     return (
         name == nil ||
-        section == nil && [name length] == 0 ||
+        (section == nil && [name length] == 0) ||
         [name isEqualToString:section]
     ) && [self visible];
 }
@@ -3979,7 +3979,7 @@ static _H<NSMutableSet> Diversions_;
 }
 
 - (BOOL) isEqual:(Diversion *)object {
-    return self == object || [self class] == [object class] && [key_ isEqual:[object key]];
+    return self == object || ([self class] == [object class] && [key_ isEqual:[object key]]);
 }
 
 @end
