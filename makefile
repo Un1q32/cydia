@@ -21,9 +21,7 @@ flags += -fvisibility=hidden
 flags += -DkCFCoreFoundationVersionNumber_iPhoneOS_3_2=478.61
 flags += -Wall
 
-flags += -Wno-unknown-warning-option
-flags += -Wno-logical-op-parentheses
-flags += -Wno-deprecated-declarations
+flags += -Wno-vla-cxx-extension
 flags += -Wno-deprecated
 
 xflags :=

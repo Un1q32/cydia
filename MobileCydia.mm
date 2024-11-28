@@ -278,10 +278,10 @@ static bool IsReachable(const char *name) {
     // XXX: do we care if the user has to intervene? maybe that's ok?
     return
         (flags & kSCNetworkReachabilityFlagsReachable) != 0 && (
-            (flags & kSCNetworkReachabilityFlagsConnectionRequired) == 0 || (
+            (flags & kSCNetworkReachabilityFlagsConnectionRequired) == 0 || ((
                 (flags & kSCNetworkReachabilityFlagsConnectionOnDemand) != 0 ||
                 (flags & kSCNetworkReachabilityFlagsConnectionOnTraffic) != 0
-            ) && (flags & kSCNetworkReachabilityFlagsInterventionRequired) == 0 ||
+            ) && (flags & kSCNetworkReachabilityFlagsInterventionRequired) == 0) ||
             (flags & kSCNetworkReachabilityFlagsIsWWAN) != 0
         )
     ;
