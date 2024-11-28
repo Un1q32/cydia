@@ -119,7 +119,7 @@ Images/%.png: %.png
 	@./pngcrush.sh $< $@
 
 sysroot: sysroot.sh
-	@echo "Your ./sysroot/ is either missing or out of date. Please read compiling.txt for help." 1>&2
+	@echo "Your ./sysroot/ is either missing or out of date. Please re-run sysroot.sh." 1>&2
 	@echo 1>&2
 	@exit 1
 
