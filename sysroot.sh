@@ -41,7 +41,7 @@ rm -rf iossdk macsdk
 wget -O iossdk.tar.xz 'https://raw.githubusercontent.com/Un1q32/iphoneports-sdk/26f5f1ea9c1faf68e11d7adde51c60bc62ca305a/iPhoneOS5.1.sdk.tar.xz'
 gtar -xf iossdk.tar.xz
 mv iPhoneOS*.sdk iossdk
-wget -O macsdk.tar.xz 'https://github.com/phracker/MacOSX-SDKs/releases/download/11.3/MacOSX10.6.sdk.tar.xz'
+wget -O macsdk.tar.xz 'https://github.com/phracker/MacOSX-SDKs/releases/download/11.3/MacOSX10.7.sdk.tar.xz'
 gtar -xf macsdk.tar.xz
 mv MacOS*.sdk macsdk
 macsdk="$PWD/macsdk"
@@ -87,7 +87,6 @@ declare -A urls
 
 urls[apt7]=http://apt.saurik.com/debs/apt7_0.7.25.3-9_iphoneos-arm.deb
 urls[apt7-lib]=http://apt.saurik.com/debs/apt7-lib_0.7.25.3-16_iphoneos-arm.deb
-urls[coreutils]=http://apt.saurik.com/debs/coreutils_8.12-13_iphoneos-arm.deb
 urls[mobilesubstrate]=http://apt.saurik.com/debs/mobilesubstrate_0.9.6301_iphoneos-arm.deb
 
 if [[ 0 ]]; then
