@@ -18,7 +18,6 @@ flags += -I. -isystem sysroot/var/usr/include -isystem sysroot/usr/include
 flags += -fmessage-length=0
 flags += -g0 -O2
 flags += -fvisibility=hidden
-flags += -DkCFCoreFoundationVersionNumber_iPhoneOS_3_2=478.61
 flags += -Wall
 
 flags += -Wno-objc-protocol-method-implementation
@@ -163,13 +162,6 @@ debs/cydia_$(version)_iphoneos-arm.deb: MobileCydia preinst postinst cfversion $
 	mkdir -p _/Applications/Cydia.app/Sources
 	ln -s /usr/share/bigboss/icons/bigboss.png _/Applications/Cydia.app/Sources/apt.bigboss.us.com.png
 	ln -s /usr/share/bigboss/icons/planetiphones.png _/Applications/Cydia.app/Sections/"Planet-iPhones Mods.png"
-	
-	#mkdir -p _/Applications/AppleTV.app/Appliances
-	#cp -a Cydia.frappliance _/Applications/AppleTV.app/Appliances
-	#cp -a CydiaAppliance _/Applications/AppleTV.app/Appliances/Cydia.frappliance
-	
-	#mkdir -p _/Applications/Lowtide.app/Appliances
-	#ln -s {/Applications/AppleTV,_/Applications/Lowtide}.app/Appliances/Cydia.frappliance
 	
 	mkdir -p _/DEBIAN
 	./control.sh cydia.control _ >_/DEBIAN/control
