@@ -1,5 +1,5 @@
 gxx := clang++
-ifdef DEBUG
+ifdef debug
 strip := true
 else
 ifeq ($(shell uname -s),Darwin)
@@ -20,7 +20,7 @@ sdk := $(shell pwd)/iossdk
 flags += -F$(sdk)/System/Library/PrivateFrameworks
 flags += -I. -isystem sysroot/var/usr/include -isystem sysroot/usr/include
 flags += -fmessage-length=0
-ifdef DEBUG
+ifdef debug
 flags += -g -Og
 else
 flags += -g0 -O2
