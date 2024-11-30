@@ -127,14 +127,17 @@ MobileCydia: sysroot $(object) entitlements.xml
 	@ldid -T0 -Sentitlements.xml $@ || { rm -f $@ && false; }
 
 CydiaAppliance: CydiaAppliance.mm
-	$(cycc) $(filter %.mm,$^) $(flags) $(link) -bundle $(libs) $(backrow)
+	@echo "[link] $(filter %.mm,$^)"
+	@$(cycc) $(filter %.mm,$^) $(flags) $(link) -bundle $(libs) $(backrow)
 
 cfversion: cfversion.c
-	$(cycc) $(filter %.c,$^) $(flags) $(link) -framework CoreFoundation
+	@echo "[link] $(filter %.c,$^)"
+	@$(cycc) $(filter %.c,$^) $(flags) $(link) -framework CoreFoundation
 	@ldid -T0 -S $@
 
 postinst: postinst.mm Sources.mm Sources.h CyteKit/stringWithUTF8Bytes.mm CyteKit/stringWithUTF8Bytes.h CyteKit/UCPlatform.h
-	$(cycc) $(filter %.mm,$^) $(flags) $(link) -framework CoreFoundation -framework Foundation -framework UIKit
+	@echo "[link] $(filter %.mm,$^)"
+	@$(cycc) $(filter %.mm,$^) $(flags) $(link) -framework CoreFoundation -framework Foundation -framework UIKit
 	@ldid -T0 -S $@
 
 debs/cydia_$(version)_iphoneos-arm.deb: MobileCydia preinst postinst cfversion $(images) $(shell find MobileCydia.app) cydia.control Library/firmware.sh Library/startup
