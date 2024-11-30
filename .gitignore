@@ -13,3 +13,4 @@ cfversion
 bins
 macsdk
 iossdk
+*.dSYM
