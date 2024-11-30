@@ -42,7 +42,7 @@ wget -qO- "${repository}dists/${distribution}/${component}/binary-${architecture
     done
 }
 
-rm -f *.deb
+rm -f ./*.deb
 
 mkdir -p usr/include
 cd usr/include

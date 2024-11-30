@@ -1,15 +1,15 @@
-Package: cydia
+Package: iphoneports-cydia
 Priority: required
 Section: Packaging
-Maintainer: Jay Freeman (saurik) <saurik@saurik.com>
+Maintainer: Uniq <joey.t.reinhart@gmail.com>
 Architecture: iphoneos-arm
 Version: 
-Replaces: com.sosiphone.addcydia
+Replaces: com.sosiphone.addcydia, cydia, cydia-lproj
 Depends: apr-lib, apt7-lib, apt7-key, darwintools, pcre, sed, shell-cmds, system-cmds, uikittools (>= 1.1.0)
 Pre-Depends: dpkg (>= 1.14.25-8)
-Conflicts: com.sosiphone.addcydia
+Conflicts: com.sosiphone.addcydia, cydia, cydia-lproj
+Provides: cydia, cydia-lproj
 Description: graphical iPhone front-end for APT
 Name: Cydia Installer
 Author: Jay Freeman (saurik) <saurik@saurik.com>
-Depiction: http://cydia.saurik.com/info/cydia/
 Tag: purpose::uikit, cydia::essential, role::enduser
