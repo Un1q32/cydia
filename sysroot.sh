@@ -1,18 +1,26 @@
 #!/usr/bin/env bash
 
-if [[ ${BASH_VERSION} != 4* ]]; then
-    echo "bash 4.0 required" 1>&2
+if [ "${BASH_VERSION%%.*}" -lt 4 ]; then
+    echo "bash 4.0 or newer required." 1>&2
     exit 1
 fi
 
 shopt -s extglob
 shopt -s nullglob
 
-PATH=/Library/Cydia/bin:$PATH
+rm -rf iossdk macsdk
+wget -O iossdk.tar.lzma 'https://invoxiplaygames.uk/sdks/iPhoneOS4.0.sdk.tar.lzma'
+gtar -xf iossdk.tar.lzma
+mv iPhoneOS*.sdk iossdk
+wget -O macsdk.tar.xz 'https://github.com/phracker/MacOSX-SDKs/releases/download/11.3/MacOSX10.6.sdk.tar.xz'
+gtar -xf macsdk.tar.xz
+mv MacOS*.sdk macsdk
+macsdk="$PWD/macsdk"
+rm macsdk.tar.xz iossdk.tar.lzma
 
 rm -rf sysroot
 mkdir sysroot
-cd sysroot
+cd sysroot || exit 1
 
 repository=http://apt.saurik.com/
 distribution=tangelo
@@ -45,50 +53,30 @@ wget -qO- "${repository}dists/${distribution}/${component}/binary-${architecture
 rm -f ./*.deb
 
 mkdir -p usr/include
-cd usr/include
+cd usr/include || exit 1
 
 mkdir CoreFoundation
-wget -O CoreFoundation/CFBundlePriv.h "http://www.opensource.apple.com/source/CF/CF-550/CFBundlePriv.h?txt"
-wget -O CoreFoundation/CFPriv.h "http://www.opensource.apple.com/source/CF/CF-550/CFPriv.h?txt"
-wget -O CoreFoundation/CFUniChar.h "http://www.opensource.apple.com/source/CF/CF-550/CFUniChar.h?txt"
+wget -O CoreFoundation/CFBundlePriv.h "https://raw.githubusercontent.com/apple-oss-distributions/CF/refs/tags/CF-550/CFBundlePriv.h"
+wget -O CoreFoundation/CFPriv.h "https://raw.githubusercontent.com/apple-oss-distributions/CF/refs/tags/CF-550/CFPriv.h"
+wget -O CoreFoundation/CFUniChar.h "https://raw.githubusercontent.com/apple-oss-distributions/CF/refs/tags/CF-550/CFUniChar.h"
 
-if true; then
-    mkdir -p WebCore
-    wget -O WebCore/WebCoreThread.h 'http://www.opensource.apple.com/source/WebCore/WebCore-658.28/wak/WebCoreThread.h?txt'
-else
-    wget -O WebCore.tgz http://www.opensource.apple.com/tarballs/WebCore/WebCore-658.28.tar.gz
-    tar -zx --transform 's@^[^/]*/@WebCore.d/@' -f WebCore.tgz
-
-    mkdir WebCore
-    cp -a WebCore.d/{*,rendering/style,platform/graphics/transforms}/*.h WebCore
-    cp -a WebCore.d/platform/{animation,graphics,network,text}/*.h WebCore
-    cp -a WebCore.d/{accessibility,platform{,/{graphics,network,text}}}/{cf,mac,iphone}/*.h WebCore
-    cp -a WebCore.d/bridge/objc/*.h WebCore
-
-    wget -O JavaScriptCore.tgz http://www.opensource.apple.com/tarballs/JavaScriptCore/JavaScriptCore-554.1.tar.gz
-    #tar -zx --transform 's@^[^/]*/API/@JavaScriptCore/@' -f JavaScriptCore.tgz $(tar -ztf JavaScriptCore.tgz | grep '/API/[^/]*.h$')
-    tar -zx \
-        --transform 's@^[^/]*/@@' \
-        --transform 's@^icu/@@' \
-    -f JavaScriptCore.tgz $(tar -ztf JavaScriptCore.tgz | sed -e '
-        /\/icu\/unicode\/.*\.h$/ p;
-        /\/profiler\/.*\.h$/ p;
-        /\/runtime\/.*\.h$/ p;
-        /\/wtf\/.*\.h$/ p;
-        d;
-    ')
-fi
+mkdir -p WebCore
+wget -O WebCore/WebCoreThread.h 'https://raw.githubusercontent.com/apple-oss-distributions/WebCore/refs/tags/WebCore-658.28/wak/WebCoreThread.h'
 
 for framework in ApplicationServices CoreServices IOKit IOSurface JavaScriptCore QuartzCore WebKit; do
-    ln -s /System/Library/Frameworks/"${framework}".framework/Headers "${framework}"
+    ln -s "${macsdk}"/System/Library/Frameworks/"${framework}".framework/Headers "${framework}"
 done
 
-for framework in /System/Library/Frameworks/CoreServices.framework/Frameworks/*.framework; do
+for framework in "${macsdk}"/System/Library/Frameworks/CoreServices.framework/Frameworks/*.framework; do
     name=${framework}
     name=${name%.framework}
     name=${name##*/}
     ln -s "${framework}/Headers" "${name}"
 done
+
+mkdir -p sys
+ln -s "${macsdk}"/usr/include/sys/reboot.h sys
+ln -sf ../../Library/Frameworks/CydiaSubstrate.framework/Headers/CydiaSubstrate.h substrate.h
 
 mkdir -p Cocoa
 cat >Cocoa/Cocoa.h <<EOF

@@ -1,29 +1,13 @@
-sdks := /Developer/Platforms/iPhoneOS.platform/Developer/SDKs
-
 ios := 3.2
-#ios := 2.0
 
-ifeq ($(patsubst 2%,2,$(ios)),2)
-gcc := 4.0
-else
 gcc := 4.2
-endif
 
 flags := 
 link := 
 
-ifeq (o,O) # gzip is actually better
-dpkg := /Library/Cydia/bin/dpkg-deb
-ifeq ($(wildcard $(dpkg)),$(dpkg))
-dpkg := $(dpkg) -zlzma
-else
-dpkg := dpkg-deb -zbzip2
-endif
-else
-dpkg := dpkg-deb
-endif
+dpkg := dpkg-deb -Zgzip --root-owner-group
 
-sdk := $(sdks)/iPhoneOS$(ios).sdk
+sdk := iossdk
 
 flags += -F$(sdk)/System/Library/PrivateFrameworks
 flags += -I. -isystem sysroot/usr/include -Lsysroot/usr/lib
@@ -48,17 +32,11 @@ link += -lapr-1
 link += -lapt-pkg
 link += -lpcre
 
-link += -multiply_defined suppress
-
 uikit := 
 uikit += -framework UIKit
 
-backrow := 
-backrow += -FAppleTV -framework BackRow -framework AppleTV
-
-#cycc = cycc -r4.2 -i$(ios) -o$@
 gxx := /Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/g++-$(gcc)
-cycc = $(gxx) -mthumb -arch armv6 -o $@ -mcpu=arm1176jzf-s -miphoneos-version-min=2.0 -isysroot $(sdk) -idirafter /usr/include -F/Library/Frameworks
+cycc = $(gxx) -mthumb -arch armv6 -o $@ -mcpu=arm1176jzf-s -miphoneos-version-min=2.0 -isysroot $(sdk)
 
 all: MobileCydia
 
@@ -90,10 +68,6 @@ package: MobileCydia
 	cp -a MobileCydia.app _/Applications/Cydia.app
 	cp -a MobileCydia _/Applications/Cydia.app/MobileCydia
 	
-	#mkdir -p _/Applications/Lowtide.app/Appliances
-	#cp -a Cydia.frappliance _/Applications/Lowtide.app/Appliances
-	#cp -a CydiaAppliance _/Applications/Lowtide.app/Appliances/Cydia.frappliance
-	
 	mkdir -p _/System/Library/PreferenceBundles
 	cp -a CydiaSettings.bundle _/System/Library/PreferenceBundles/CydiaSettings.bundle
 	
@@ -102,8 +76,6 @@ package: MobileCydia
 	
 	find _ -name '*.png' -exec ./pngcrush.sh '{}' ';'
 	
-	sudo chown -R 0 _
-	sudo chgrp -R 0 _
 	sudo chmod 6755 _/Applications/Cydia.app/MobileCydia
 	
 	mkdir -p debs
