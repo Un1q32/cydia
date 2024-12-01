@@ -6,7 +6,7 @@ steps=()
 function step() {
     "$@"
     mv -f {_,}_.png
-    steps+=($(stat -f "%z" _.png))
+    steps+=($(ls -l _.png | awk '{print $5}'))
 }
 
 if command -v xcode-select > /dev/null; then
