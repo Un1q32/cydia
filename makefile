@@ -1,7 +1,5 @@
 ios := 3.2
 
-gcc := 4.2
-
 flags := 
 link := 
 
@@ -35,7 +33,7 @@ link += -lpcre
 uikit := 
 uikit += -framework UIKit
 
-gxx := /Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/g++-$(gcc)
+gxx := /Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/g++
 cycc = $(gxx) -mthumb -arch armv6 -o $@ -mcpu=arm1176jzf-s -miphoneos-version-min=2.0 -isysroot $(sdk)
 
 all: MobileCydia
