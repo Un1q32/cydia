@@ -5,6 +5,25 @@ if [ "${BASH_VERSION%%.*}" -lt 4 ]; then
     exit 1
 fi
 
+if command -v gtar &> /dev/null; then
+    tar=gtar
+else
+    tarversion="$(tar --version 2>/dev/null)"
+    case $tarversion in
+        *GNU*)
+            tar=tar
+        ;;
+        *)
+            echo "Can't find GNU tar, please install GNU tar."
+            exit 1
+        ;;
+    esac
+fi
+
+gtar() {
+    command "$tar" "$@"
+}
+
 shopt -s extglob
 shopt -s nullglob
 
@@ -27,28 +46,67 @@ distribution=tangelo
 component=main
 architecture=iphoneos-arm
 
-wget -qO- "${repository}dists/${distribution}/${component}/binary-${architecture}/Packages.bz2" | bzcat | {
-    regex='^([^ \t]*): *(.*)'
-    declare -A fields
+declare -A dpkgz
+dpkgz[gz]=gunzip
+dpkgz[lzma]=unlzma
 
-    while IFS= read -r line; do
-        if [[ ${line} == '' ]]; then
-            package=${fields[package]}
-            if [[ ${package} == *(apr|apr-lib|apt7|apt7-lib|coreutils|mobilesubstrate|pcre) ]]; then
-                filename=${fields[filename]}
-                wget -O "${package}.deb" "${repository}${filename}"
-                dpkg-deb -x "${package}.deb" .
-            fi
+extract() {
+    package=$1
+    url=$2
 
-            unset fields
-            declare -A fields
-        elif [[ ${line} =~ ${regex} ]]; then
-            name=${BASH_REMATCH[1],,}
-            value=${BASH_REMATCH[2]}
-            fields[${name}]=${value}
+    wget -O "${package}.deb" "${url}"
+    for z in lzma gz; do
+        compressed=data.tar.${z}
+
+        if ar -x "${package}.deb" "${compressed}" 2>/dev/null && [ -f "${compressed}" ]; then
+            ${dpkgz[${z}]} "${compressed}"
+            break
         fi
     done
+
+    if ! [[ -e data.tar ]]; then
+        echo "unable to extract package" 1>&2
+        exit 1
+    fi
+
+    ls -la data.tar
+    gtar -xf ./data.tar
+    rm -f data.tar
 }
+
+declare -A urls
+
+urls[apt7]=http://apt.saurik.com/debs/apt7_0.7.25.3-9_iphoneos-arm.deb
+urls[apt7-lib]=http://apt.saurik.com/debs/apt7-lib_0.7.25.3-16_iphoneos-arm.deb
+urls[mobilesubstrate]=http://apt.saurik.com/debs/mobilesubstrate_0.9.6301_iphoneos-arm.deb
+
+if [[ 0 ]]; then
+    wget -qO- "${repository}dists/${distribution}/${component}/binary-${architecture}/Packages.bz2" | bzcat | {
+        regex='^([^ \t]*): *(.*)'
+        declare -A fields
+
+        while IFS= read -r line; do
+            if [[ ${line} == '' ]]; then
+                package=${fields[package]}
+                if [[ -n ${urls[${package}]} ]]; then
+                    filename=${fields[filename]}
+                    urls[${package}]=${repository}${filename}
+                fi
+
+                unset fields
+                declare -A fields
+            elif [[ ${line} =~ ${regex} ]]; then
+                name=${BASH_REMATCH[1],,}
+                value=${BASH_REMATCH[2]}
+                fields[${name}]=${value}
+            fi
+        done
+    }
+fi
+
+for package in "${!urls[@]}"; do
+    extract "${package}" "${urls[${package}]}"
+done
 
 rm -f ./*.deb
 
