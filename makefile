@@ -1,5 +1,3 @@
-ios := 3.2
-
 flags := 
 link := 
 
@@ -9,7 +7,7 @@ sdk := iossdk
 
 flags += -F$(sdk)/System/Library/PrivateFrameworks
 flags += -I. -isystem sysroot/usr/include -Lsysroot/usr/lib
-flags += -Wall -Werror -Wno-deprecated-declarations
+flags += -w
 flags += -fmessage-length=0
 flags += -g0 -O2
 flags += -fobjc-call-cxx-cdtors -fobjc-exceptions
@@ -33,8 +31,8 @@ link += -lpcre
 uikit := 
 uikit += -framework UIKit
 
-gxx := /Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/g++
-cycc = $(gxx) -mthumb -arch armv6 -o $@ -mcpu=arm1176jzf-s -miphoneos-version-min=2.0 -isysroot $(sdk)
+gxx := clang++
+cycc = $(gxx) -target armv6-apple-ios3 -o $@ -isysroot $(sdk) -stdlib=libstdc++ -std=c++03
 
 all: MobileCydia
 
@@ -52,7 +50,7 @@ CydiaAppliance: CydiaAppliance.mm
 	$(cycc) $(filter %.mm,$^) $(flags) -bundle $(link) $(backrow)
 
 package: MobileCydia
-	sudo rm -rf _
+	rm -rf _
 	mkdir -p _/var/lib/cydia
 	
 	mkdir -p _/usr/libexec
@@ -74,11 +72,11 @@ package: MobileCydia
 	
 	find _ -name '*.png' -exec ./pngcrush.sh '{}' ';'
 	
-	sudo chmod 6755 _/Applications/Cydia.app/MobileCydia
+	chmod 6755 _/Applications/Cydia.app/MobileCydia
 	
 	mkdir -p debs
 	ln -sf debs/cydia_$$(./version.sh)_iphoneos-arm.deb Cydia.deb
 	$(dpkg) -b _ Cydia.deb
-	@echo "$$(stat -L -f "%z" Cydia.deb) $$(stat -f "%Y" Cydia.deb)"
+	@echo "$$(ls -l $$(readlink Cydia.deb) | awk '{print $$5}') $$(readlink Cydia.deb)"
 
 .PHONY: all clean sign
