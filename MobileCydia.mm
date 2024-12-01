@@ -5243,7 +5243,7 @@ bool DepSubstrate(const pkgCache::VerIterator &iterator) {
         progress_ = [[[CydiaProgressData alloc] init] autorelease];
         [progress_ setDelegate:self];
 
-        [self setURL:[NSURL fileURLWithPath:[[NSBundle mainBundle] pathForResource:@"progress/index" ofType:@"html"]]];
+        [self setURL:[NSURL fileURLWithPath:[[NSBundle mainBundle] pathForResource:@"progress" ofType:@"html"]]];
 
         [scroller_ setBackgroundColor:[UIColor blackColor]];
 
@@ -6615,7 +6615,7 @@ static void HomeControllerReachabilityCallback(SCNetworkReachabilityRef reachabi
 
 - (id) init {
     if ((self = [super init]) != nil) {
-        [self setURL:[NSURL fileURLWithPath:[[NSBundle mainBundle] pathForResource:@"home/index" ofType:@"html"]]];
+        [self setURL:[NSURL fileURLWithPath:[[NSBundle mainBundle] pathForResource:@"home" ofType:@"html"]]];
         [self reloadData];
 
         reachability_ = SCNetworkReachabilityCreateWithName(kCFAllocatorDefault, "cydia.saurik.com");
