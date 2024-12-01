@@ -1,0 +1,67 @@
+<!DOCTYPE html SYSTEM "about:legacy-compat">
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title localize="CONFIRM"></title>
+    <link rel="stylesheet" type="text/css" href="cytyle/_style.css">
+    <meta name="viewport" content="width=320, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="format-detection" content="telephone=no">
+    <script type="text/javascript" src="fastclick.js"></script>
+    <script type="text/javascript" src="cytyle/_style.js"></script>
+    <script type="text/javascript">
+        if(navigator.userAgent.search(/Cydia/)!=-1){var title=document.title;var dot=title.indexOf('·');if(dot!=-1)
+        document.title=title.substring(0,dot);}
+    </script>
+    <script type="text/javascript" src="menes/menes.js"></script>
+    <script type="text/javascript" src="appcache.js"></script>
+    <script type="text/javascript" src="localize.js"></script>
+</head>
+
+<body class="pinstripe">
+    <panel id="issues">
+        <fieldset class="issues">
+            <div>
+                <p><span style="color:red;font-weight:bold" localize="NOTE"></span>: <span localize="CANNOT_COMPLY_EX"></span></p>
+            </div>
+        </fieldset>
+        <fieldset class="queue">
+            <a href="#" onclick="cydiaConfirm.queue(); return false" style="text-align:center;color:#2a3f70;font-size:15px;background-image:none">
+                <div>
+                    <div><label><p localize="CONTINUE_QUEUING"></p></label></div>
+                </div>
+            </a>
+        </fieldset><label class="_issues statistics"><p localize="STATISTICS"></p></label>
+        <fieldset class="_issues statistics">
+            <a class="downloading">
+                <div>
+                    <div><label><p localize="DOWNLOADING"></p></label><label class="detail"><p id="downloading"></p></label></div>
+                </div>
+            </a>
+            <a class="resuming">
+                <div>
+                    <div><label><p localize="RESUMING_AT"></p></label><label class="detail"><p id="resuming"></p></label></div>
+                </div>
+            </a>
+        </fieldset><label><p localize="MODIFICATIONS"></p></label>
+        <fieldset id="modifications"></fieldset>
+    </panel>
+    <script type="text/javascript">
+        (function(){if(typeof this.cydiaConfirm=='undefined')
+        this.cydiaConfirm=this;var data=this.cydiaConfirm;SizeString=function(size){var negative=size<0;if(negative)
+        size=-size;var power=0;while(size>1024){size=size/1024;++power;}
+        return(negative?"-":"")+size.toFixed(1)+' '+["B","kB","MB","GB"][power];};DisplayName=function(name){var package=cydia.getPackageById(name);return package==null?name:package.name;}
+        if(data.issues==null||data.issues.length==0){$(".issues").remove();var removed=0;var downloading=SizeString(data.sizes.downloading);if(downloading=="0.0 B"){$(".downloading").remove();removed+=1;}else{$("#downloading").html($.xml(downloading));}
+        var resuming=SizeString(data.sizes.resuming);if(resuming=="0.0 B"){$(".resuming").remove();removed+=1;}else{$("#resuming").html($.xml(resuming));}
+        if(removed>=2)
+        $(".statistics").remove();}else{document.title=cydia.localize("CANNOT_COMPLY");$("._issues").remove();for(var i=0;i!=data.issues.length;++i){var issue=data.issues[i];var package=issue.package;if(package!=null)
+        $("#issues").append("<label style=\"color: #704d4d\">"+$.xml(DisplayName(package))+"</label>");$("#issues").append("<fieldset style=\"background-color: #ffcccc\" id=\"i"+i+"\"></fieldset>");var reasons=issue.reasons;for(var reason in reasons){var reason=reasons[reason];var type=reason.relationship;if(type=="PreDepends")
+        type="Depends";var clauses=reason.clauses;for(var clause in clauses){clause=clauses[clause];var target=DisplayName(clause.package);var version=clause.version;if(version!=null)
+        target+=" "+version.operator+version.value;$("#i"+i).append("<a><div><div>"+"<label><p>"+$.xml(type)+"</p></label>"+"<label class=\"detail\"><p>"+$.xml(target)+"</p></label>"+"</div></div></a>");}}}}
+        var keys={"installs":"INSTALL","reinstalls":"REINSTALL","upgrades":"UPGRADE","downgrades":"DOWNGRADE","removes":"REMOVE",};for(var i in keys){var list=data.changes[i];var length=list.length;if(length!=0){$("#modifications").append("<a><div><div>"+"<label><p>"+cydia.localize($.xml(keys[i]))+"</p></label>"+"<label class=\"detail\"><p id=\"c"+i+"\"></p></label>"+"</div></div></a>");var value="";for(var j=0;j!=length;++j){if(j!=0)
+        value+="<br/>";value+=$.xml(DisplayName(list[j]));}
+        $("#c"+i).html(value);}}})();
+    </script>
+</body>
+
+</html>

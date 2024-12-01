@@ -5024,7 +5024,7 @@ bool DepSubstrate(const pkgCache::VerIterator &iterator) {
             [NSNumber numberWithInteger:[database_ fetcher].PartialPresent()], @"resuming",
         nil];
 
-        [self setURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@/#!/confirm/", UI_]]];
+        [self setURL:[NSURL fileURLWithPath:[[NSBundle mainBundle] pathForResource:@"confirm" ofType:@"html"]]];
     } return self;
 }
 
@@ -5243,7 +5243,7 @@ bool DepSubstrate(const pkgCache::VerIterator &iterator) {
         progress_ = [[[CydiaProgressData alloc] init] autorelease];
         [progress_ setDelegate:self];
 
-        [self setURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@/#!/progress/", UI_]]];
+        [self setURL:[NSURL fileURLWithPath:[[NSBundle mainBundle] pathForResource:@"progress/index" ofType:@"html"]]];
 
         [scroller_ setBackgroundColor:[UIColor blackColor]];
 
@@ -6615,7 +6615,7 @@ static void HomeControllerReachabilityCallback(SCNetworkReachabilityRef reachabi
 
 - (id) init {
     if ((self = [super init]) != nil) {
-        [self setURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@/#!/home/", UI_]]];
+        [self setURL:[NSURL fileURLWithPath:[[NSBundle mainBundle] pathForResource:@"home/index" ofType:@"html"]]];
         [self reloadData];
 
         reachability_ = SCNetworkReachabilityCreateWithName(kCFAllocatorDefault, "cydia.saurik.com");

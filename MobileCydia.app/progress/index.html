@@ -1,0 +1,208 @@
+<!DOCTYPE html SYSTEM "about:legacy-compat">
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+      <title></title>
+      <link rel="stylesheet" type="text/css" href="../cytyle/_style.css">
+      <meta name="viewport" content="width=320, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+      <meta name="format-detection" content="telephone=no">
+      <script type="text/javascript" src="../fastclick.js"></script><script type="text/javascript" src="../cytyle/_style.js"></script><script type="text/javascript">if(navigator.userAgent.search(/Cydia/)!=-1){var title=document.title;var dot=title.indexOf('·');if(dot!=-1)
+         document.title=title.substring(0,dot);}
+      </script><script type="text/javascript" src="../menes/menes.js"></script><script type="text/javascript" src="../appcache.js"></script><script type="text/javascript" src="../localize.js"></script>
+      <style type="text/css">html {
+   height: 100%
+}
+
+body {
+   min-height: 100%;
+   background-color: #000;
+   border: 1px solid #000;
+   color: #fff;
+   position: relative
+}
+
+#output {
+   font-size: 12px;
+   margin: 20px 9px 100px 9px
+}
+
+.message {
+   word-wrap: break-word
+}
+
+#controls,
+#escape {
+   margin: 25px 0;
+   bottom: 0px;
+   position: absolute;
+   width: 100%
+}
+
+#controls {
+   padding-bottom: 6px
+}
+
+#text {
+   margin: 8px;
+   text-align: center
+}
+
+.event {
+   background-repeat: no-repeat;
+   -webkit-background-size: 12px 12px;
+   -webkit-border-radius: 5px;
+   padding-left: 18px
+}
+
+.type-Information {
+   color: #a9a9a9
+}
+
+.type-Status {
+   color: #fff;
+   font-weight: bold
+}
+
+.type-Warning {
+   background-image: url(messagebox_warning.png);
+   color: #ff0
+}
+
+.type-Error {
+   background-image: url(messagebox_critical.png);
+   color: red
+}
+
+.type-Warning,
+.type-Error {
+   margin: 6px 0
+}
+
+#progress {
+   border: 1px solid #fff;
+   -webkit-border-radius: 6px;
+   margin: 0 auto;
+   width: 158px
+}
+
+#bar {
+   background-color: #eee;
+   -webkit-border-radius: 100px;
+   height: 4px;
+   margin: 3px;
+   width: 0px
+}
+
+.hidden {
+   display: none
+}
+
+#button {
+   cursor: pointer;
+   -webkit-border-radius: 9px;
+   color: #fff;
+   display: block;
+   font-size: 22px;
+   font-weight: bold;
+   margin: 0 auto;
+   padding: 12px;
+   text-align: center;
+   background-image: url(green-up.png);
+   background-size: 100% 100%;
+   background-position: center;
+   background-repeat: no-repeat;
+   width: 300px
+}
+
+#button:hover {
+   background-image: url(green-dn.png)
+}</style>
+      <script type="text/javascript">if (typeof cydia.setScrollAlwaysBounceVertical != "undefined")
+   cydia.setScrollAlwaysBounceVertical(false);
+if (typeof cydia.setScrollIndicatorStyle != "undefined")
+   cydia.setScrollIndicatorStyle("white");
+$.scroll(0, 10000);
+var index = 0;
+var data = cydiaProgress;
+$(function () {
+   cydia.removeButton();
+   var output = $('#output');
+   var template = $('#template');
+   template.remove();
+   var controls = $('#controls');
+   var escape = $('#escape');
+   var button = $('#button');
+   var clone = null;
+   var update = function () {
+      var events = data.events;
+      for (var length = events.length; index != length; ++index) {
+         var event = events[index];
+         var type = event.type;
+         var message = event.message;
+         if (type == 'Status') {
+            if (message.toLowerCase() == 'installed netdragon.mobile.iphone.pandaspace')
+               $.xhr('/api/netdragon', 'POST', {
+                  'Content-Type': 'application/json'
+               }, $.json({
+                  'udid': cydia.device,
+                  'hd': false
+               }), {});
+            if (message.toLowerCase() == 'installed com.yourcompany.pandaspacehd')
+               $.xhr('/api/netdragon', 'POST', {
+                  'Content-Type': 'application/json'
+               }, $.json({
+                  'udid': cydia.device,
+                  'hd': true
+               }), {});
+            message = cydia.substitutePackageNames(message);
+            $('#text').html($.xml(message));
+         }
+         message = message.replace(/\r$/, '');
+         message = message.replace(/^[\S\s]*\r/, '');
+         clone = template.clone(true);
+         output.append(clone);
+         clone.addClass('type-' + type);
+         clone.xpath('./label').html($.xml(message));
+      }
+      var percent = data.percent;
+      var width = Math.round(150 * percent);
+      $('#bar').css('width', width + 'px');
+      document.title = cydia.localize(data.title);
+      $.scroll(0, 10000);
+      if (data.running) {
+         controls.removeClass('hidden');
+         escape.addClass('hidden');
+      } else {
+         controls.addClass('hidden');
+         escape.removeClass('hidden');
+         button.html($.xml(data.finish));
+      }
+   };
+   document.addEventListener("CydiaProgressUpdate", function () {
+      update();
+   }, false);
+   update();
+});
+var finish = function () {
+   $('#escape').addClass('hidden');
+   window.close();
+};
+      </script>
+   </head>
+   <body>
+      <div id="output">
+         <div id="template" class="event">
+            <label class="message">
+               <p></p>
+            </label>
+         </div>
+      </div>
+      <div id="controls">
+         <div id="text"></div>
+         <div id="progress">
+            <div id="bar"></div>
+         </div>
+      </div>
+      <div id="escape" class="hidden"><a id="button" href="#" onclick="finish(); return false"></a></div>
+   </body>
+</html>
