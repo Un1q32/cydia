@@ -23,6 +23,9 @@ link += -framework SpringBoardServices
 link += -framework SystemConfiguration
 link += -framework WebCore
 link += -framework WebKit
+ifneq ($(shell uname -s),Darwin)
+link += -fuse-ld=ld64 -mlinker-version=951.9
+endif
 
 link += -lapr-1
 link += -lapt-pkg
