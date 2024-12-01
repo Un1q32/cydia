@@ -42,7 +42,7 @@ xflags += -std=c++03
 link += -Lsysroot/var/usr/lib
 link += -Lsysroot/usr/lib
 link += -stdlib=libstdc++
-ifeq ($(shell uname -s),Linux)
+ifneq ($(shell uname -s),Darwin)
 link += -fuse-ld=ld64 -mlinker-version=951.9
 endif
 
