@@ -32,18 +32,18 @@ uikit :=
 uikit += -framework UIKit
 
 gxx := clang++
-cycc = $(gxx) -target armv6-apple-ios3 -o $@ -isysroot $(sdk) -stdlib=libstdc++ -std=c++03
+cycc = $(gxx) -target armv6-apple-ios3 -o $@ -isysroot $(sdk)
 
 all: MobileCydia
 
 clean:
-	rm -f MobileCydia
+	rm -f MobileCydia *.o
 
 %.o: %.c
 	$(cycc) -c -o $@ -x c $<
 
 MobileCydia: MobileCydia.mm UICaboodle/*.h UICaboodle/*.mm SDURLCache/SDURLCache.h SDURLCache/SDURLCache.m iPhonePrivate.h lookup3.o Cytore.hpp
-	$(cycc) $(filter %.mm,$^) $(filter %.o,$^) $(foreach m,$(filter %.m,$^),-x objective-c++ $(m)) $(flags) $(link) $(uikit)
+	$(cycc) $(filter %.mm,$^) $(filter %.o,$^) $(foreach m,$(filter %.m,$^),-x objective-c++ $(m)) $(flags) $(link) $(uikit) -stdlib=libstdc++ -std=c++03
 	ldid -Slaunch.xml $@ || { rm -f $@ && false; }
 
 CydiaAppliance: CydiaAppliance.mm
