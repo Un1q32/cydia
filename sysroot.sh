@@ -78,7 +78,7 @@ declare -A urls
 
 urls[apt7]=http://apt.saurik.com/debs/apt7_0.7.25.3-9_iphoneos-arm.deb
 urls[apt7-lib]=http://apt.saurik.com/debs/apt7-lib_0.7.25.3-16_iphoneos-arm.deb
-urls[mobilesubstrate]=http://apt.saurik.com/debs/mobilesubstrate_0.9.6301_iphoneos-arm.deb
+urls[mobilesubstrate]=http://apt.saurik.com/debs/mobilesubstrate_0.9.3367-1_iphoneos-arm.deb
 
 if [[ 0 ]]; then
     wget -qO- "${repository}dists/${distribution}/${component}/binary-${architecture}/Packages.bz2" | bzcat | {
