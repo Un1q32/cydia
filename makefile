@@ -179,6 +179,8 @@ debs/cydia_$(version)_iphoneos-arm.deb: MobileCydia preinst postinst cfversion $
 	cp -a preinst postinst _/DEBIAN/
 	
 	chmod 6755 _/Applications/Cydia.app/MobileCydia
+
+	find _ -name .DS_Store -delete
 	
 	mkdir -p debs
 	ln -sf debs/cydia_$(version)_iphoneos-arm.deb Cydia.deb
