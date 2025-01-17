@@ -39,7 +39,6 @@ xflags += -fvisibility-inlines-hidden
 xflags += -stdlib=libstdc++
 xflags += -std=c++03
 
-link += -Lsysroot/var/usr/lib
 link += -Lsysroot/usr/lib
 link += -stdlib=libstdc++
 ifneq ($(shell uname -s),Darwin)
