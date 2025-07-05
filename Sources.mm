@@ -34,7 +34,6 @@ void CydiaWriteSources() {
     _assert(file != NULL);
 
     fprintf(file, "deb http://apt.saurik.com/ ios/%.2f main\n", kCFCoreFoundationVersionNumber);
-    fprintf(file, "deb http://cydia.uniq.gay/ ./\n");
 
     for (NSString *key in [Sources_ allKeys]) {
         NSDictionary *source([Sources_ objectForKey:key]);
