@@ -42,7 +42,7 @@ xflags += -std=c++03
 link += -Lsysroot/usr/lib
 link += -stdlib=libstdc++
 ifneq ($(shell uname -s),Darwin)
-link += -fuse-ld=ld64 -mlinker-version=951.9
+link += -fuse-ld=ld64 -mlinker-version=955.13
 endif
 
 libs += -framework CoreFoundation
