@@ -63,7 +63,7 @@ backrow += -FAppleTV -framework BackRow -framework AppleTV
 
 version := $(shell ./version.sh)
 
-cycc = $(gxx) -o $@ -isysroot $(sdk) -F{sysroot,}/Library/Frameworks
+cycc = $(gxx) -o $@ -isysroot $(sdk) -Fsysroot/Library/Frameworks
 
 dirs := Menes CyteKit Cydia SDURLCache
 
