@@ -32,7 +32,7 @@ xflags :=
 xflags += -fobjc-call-cxx-cdtors
 xflags += -fvisibility-inlines-hidden
 xflags += -stdlib=libstdc++
-xflags += -std=c++03
+xflags += -std=c++98
 
 link += -Lsysroot/usr/lib
 link += -stdlib=libstdc++
