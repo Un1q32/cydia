@@ -18,7 +18,7 @@ dpkg := dpkg-deb --root-owner-group -Zgzip
 sdk := $(shell pwd)/iossdk
 
 flags += -F$(sdk)/System/Library/PrivateFrameworks
-flags += -I. -isystem sysroot/var/usr/include -isystem sysroot/usr/include
+flags += -I. -isystem sysroot/usr/include
 flags += -fmessage-length=0
 ifdef debug
 flags += -g -Og
