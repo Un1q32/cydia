@@ -1,4 +1,4 @@
-gxx := clang++
+gxx := clang++ -target armv6-apple-ios2
 ifdef debug
 strip := true
 else
@@ -26,12 +26,7 @@ else
 flags += -g0 -O2
 endif
 flags += -fvisibility=hidden
-flags += -Wall
-
-flags += -Wno-objc-protocol-method-implementation
-flags += -Wno-vla-extension
-flags += -Wno-c++11-extensions
-flags += -Wno-deprecated
+flags += -w
 
 xflags :=
 xflags += -fobjc-call-cxx-cdtors
@@ -68,7 +63,7 @@ backrow += -FAppleTV -framework BackRow -framework AppleTV
 
 version := $(shell ./version.sh)
 
-cycc = $(gxx) -o $@ -target armv6-apple-ios3 -isysroot $(sdk) -F{sysroot,}/Library/Frameworks
+cycc = $(gxx) -o $@ -isysroot $(sdk) -F{sysroot,}/Library/Frameworks
 
 dirs := Menes CyteKit Cydia SDURLCache
 
