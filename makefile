@@ -1,4 +1,4 @@
-gxx := clang++ -target armv6-apple-ios2
+gxx := clang++ -target armv6-apple-ios3
 ifdef debug
 strip := true
 else
