@@ -1959,7 +1959,7 @@ struct ParsedPackage {
 - (bool) isUnfilteredAndSearchedForBy:(NSArray *)query;
 - (bool) isUnfilteredAndSelectedForBy:(NSString *)search;
 - (bool) isInstalledAndUnfiltered:(NSNumber *)number;
-- (bool) isVisibleInSection:(NSString *)section;
+- (bool) isVisibleInSection:(NSString *)section source:(Source *)source;
 - (bool) isVisibleInSource:(Source *)source;
 
 @end
@@ -3084,13 +3084,16 @@ struct PackageNameOrdering :
     return ![self uninstalled] && ((![number boolValue] && role_ != 7) || [self unfiltered]);
 }
 
-- (bool) isVisibleInSection:(NSString *)name {
+- (bool) isVisibleInSection:(NSString *)name source:(Source *)source {
     NSString *section([self section]);
 
     return (
         name == nil ||
         (section == nil && [name length] == 0) ||
         [name isEqualToString:section]
+    ) && (
+        source == nil ||
+        [self source] == source
     ) && [self visible];
 }
 
@@ -6523,10 +6526,15 @@ bool DepSubstrate(const pkgCache::VerIterator &iterator) {
     SEL filter_;
     IMP imp_;
     _H<NSObject> object_;
+    _H<NSObject> stuff_;
 }
 
 - (void) setObject:(id)object;
+- (void) setStuff:(id)object;
+- (void) setObject:(id)object andStuff:(id)stuff;
+
 - (void) setObject:(id)object forFilter:(SEL)filter;
+- (void) setObject:(id)object andStuff:(id)stuff forFilter:(SEL)filter;
 
 - (SEL) filter;
 - (void) setFilter:(SEL)filter;
@@ -6557,10 +6565,28 @@ bool DepSubstrate(const pkgCache::VerIterator &iterator) {
     object_ = object;
 } }
 
+- (void) setStuff:(id)stuff {
+@synchronized (self) {
+    stuff_ = stuff;
+} }
+
+- (void) setObject:(id)object andStuff:(id)stuff {
+@synchronized (self) {
+    object_ = object;
+    stuff_ = stuff;
+} }
+
 - (void) setObject:(id)object forFilter:(SEL)filter {
 @synchronized (self) {
     [self setFilter:filter];
-    [self setObject:object];
+    object_ = object;
+} }
+
+- (void) setObject:(id)object andStuff:(id)stuff forFilter:(SEL)filter {
+@synchronized (self) {
+    [self setFilter:filter];
+    object_ = object;
+    stuff_ = stuff;
 } }
 
 - (NSMutableArray *) _reloadPackages {
@@ -6573,16 +6599,18 @@ bool DepSubstrate(const pkgCache::VerIterator &iterator) {
     IMP imp;
     SEL filter;
     _H<NSObject> object;
+    _H<NSObject> stuff;
 
     @synchronized (self) {
         imp = imp_;
         filter = filter_;
         object = object_;
+        stuff = stuff_;
     }
 
     _profile(PackageTable$reloadData$Filter)
         for (Package *package in packages)
-            if ([package valid] && (*reinterpret_cast<bool (*)(id, SEL, id)>(imp))(package, filter, object))
+            if ([package valid] && (*reinterpret_cast<bool (*)(id, SEL, id, id)>(imp))(package, filter, object, stuff))
                 [filtered addObject:package];
     _end
 
@@ -6592,7 +6620,15 @@ bool DepSubstrate(const pkgCache::VerIterator &iterator) {
 - (id) initWithDatabase:(Database *)database title:(NSString *)title filter:(SEL)filter with:(id)object {
     if ((self = [super initWithDatabase:database title:title]) != nil) {
         [self setFilter:filter];
-        [self setObject:object];
+        object_ = object;
+    } return self;
+}
+
+- (id) initWithDatabase:(Database *)database title:(NSString *)title filter:(SEL)filter with:(id)object with:(id)stuff {
+    if ((self = [super initWithDatabase:database title:title]) != nil) {
+        [self setFilter:filter];
+        object_ = object;
+        stuff_ = stuff;
     } return self;
 }
 
@@ -6666,62 +6702,6 @@ static void HomeControllerReachabilityCallback(SCNetworkReachabilityRef reachabi
         target:self
         action:@selector(aboutButtonClicked)
     ] autorelease];
-}
-
-@end
-/* }}} */
-/* Manage Controller {{{ */
-@interface ManageController : CydiaWebViewController {
-}
-
-- (void) queueStatusDidChange;
-
-@end
-
-@implementation ManageController
-
-- (id) init {
-    if ((self = [super init]) != nil) {
-        [self setURL:[NSURL fileURLWithPath:[[NSBundle mainBundle] pathForResource:@"manage" ofType:@"html"]]];
-    } return self;
-}
-
-- (NSURL *) navigationURL {
-    return [NSURL URLWithString:@"cydia://manage"];
-}
-
-- (UIBarButtonItem *) leftButton {
-    return [[[UIBarButtonItem alloc]
-        initWithTitle:UCLocalize("SETTINGS")
-        style:UIBarButtonItemStylePlain
-        target:self
-        action:@selector(settingsButtonClicked)
-    ] autorelease];
-}
-
-- (void) settingsButtonClicked {
-    [delegate_ showSettings];
-}
-
-- (void) queueButtonClicked {
-    [delegate_ queue];
-}
-
-- (UIBarButtonItem *) rightButton {
-    return Queuing_ ? [[[UIBarButtonItem alloc]
-        initWithTitle:UCLocalize("QUEUE")
-        style:UIBarButtonItemStyleDone
-        target:self
-        action:@selector(queueButtonClicked)
-    ] autorelease] : nil;
-}
-
-- (void) queueStatusDidChange {
-    [self applyRightButton];
-}
-
-- (bool) isLoading {
-    return !Queuing_ && [super isLoading];
 }
 
 @end
@@ -7292,45 +7272,47 @@ static void HomeControllerReachabilityCallback(SCNetworkReachabilityRef reachabi
 @interface SectionController : FilteredPackageListController {
     _H<IndirectDelegate, 1> indirect_;
     _H<CydiaObject> cydia_;
+    _H<NSString> key_;
     _H<NSString> section_;
     std::vector< _H<CyteWebViewTableViewCell, 1> > promoted_;
 }
 
-- (id) initWithDatabase:(Database *)database section:(NSString *)section;
+- (id) initWithDatabase:(Database *)database source:(Source *)source section:(NSString *)section;
 
 @end
 
 @implementation SectionController
 
 - (NSURL *) referrerURL {
-    NSString *name = section_;
-    if (name == nil)
-        name = @"all";
-
-    return [NSURL URLWithString:[NSString stringWithFormat:@"%@/#!/sections/%@", UI_, [name stringByAddingPercentEscapesIncludingReserved]]];
+    NSString *name(section_);
+    name = name ?: @"*";
+    NSString *key(key_);
+    key = key ?: @"*";
+    return [NSURL URLWithString:[NSString stringWithFormat:@"%@/#!/sections/%@/%@", UI_, [key stringByAddingPercentEscapesIncludingReserved], [name stringByAddingPercentEscapesIncludingReserved]]];
 }
 
 - (NSURL *) navigationURL {
-    NSString *name = section_;
-    if (name == nil)
-        name = @"all";
-
-    return [NSURL URLWithString:[NSString stringWithFormat:@"cydia://sections/%@", [name stringByAddingPercentEscapesIncludingReserved]]];
+    NSString *name(section_);
+    name = name ?: @"*";
+    NSString *key(key_);
+    key = key ?: @"*";
+    return [NSURL URLWithString:[NSString stringWithFormat:@"cydia://sections/%@/%@", [key stringByAddingPercentEscapesIncludingReserved], [name stringByAddingPercentEscapesIncludingReserved]]];
 }
 
-- (id) initWithDatabase:(Database *)database section:(NSString *)name {
+- (id) initWithDatabase:(Database *)database source:(Source *)source section:(NSString *)section {
     NSString *title;
-    if (name == nil)
+    if (section == nil)
         title = UCLocalize("ALL_PACKAGES");
-    else if (![name isEqual:@""])
-        title = [[NSBundle mainBundle] localizedStringForKey:Simplify(name) value:nil table:@"Sections"];
+    else if (![section isEqual:@""])
+        title = [[NSBundle mainBundle] localizedStringForKey:Simplify(section) value:nil table:@"Sections"];
     else
         title = UCLocalize("NO_SECTION");
 
-    if ((self = [super initWithDatabase:database title:title filter:@selector(isVisibleInSection:) with:name]) != nil) {
+    if ((self = [super initWithDatabase:database title:title filter:@selector(isVisibleInSection:source:) with:section with:source]) != nil) {
         indirect_ = [[[IndirectDelegate alloc] initWithDelegate:self] autorelease];
         cydia_ = [[[CydiaObject alloc] initWithDelegate:indirect_] autorelease];
-        section_ = name;
+        section_ = section;
+        key_ = [source key];
     } return self;
 }
 
@@ -7440,12 +7422,13 @@ static void HomeControllerReachabilityCallback(SCNetworkReachabilityRef reachabi
     UITableViewDelegate
 > {
     _transient Database *database_;
+    _H<NSString> key_;
     _H<NSMutableArray> sections_;
     _H<NSMutableArray> filtered_;
     _H<UITableView, 2> list_;
 }
 
-- (id) initWithDatabase:(Database *)database;
+- (id) initWithDatabase:(Database *)database source:(Source *)source;
 - (void) editButtonClicked;
 
 @end
@@ -7453,7 +7436,13 @@ static void HomeControllerReachabilityCallback(SCNetworkReachabilityRef reachabi
 @implementation SectionsController
 
 - (NSURL *) navigationURL {
-    return [NSURL URLWithString:@"cydia://sections"];
+    return [NSURL URLWithString:[NSString stringWithFormat:@"cydia://sources/%@", [key_ stringByAddingPercentEscapesIncludingReserved]]];
+}
+
+- (Source *) source {
+    if (key_ == nil)
+        return nil;
+    return [database_ sourceWithKey:key_];
 }
 
 - (void) updateNavigationItem {
@@ -7534,6 +7523,7 @@ static void HomeControllerReachabilityCallback(SCNetworkReachabilityRef reachabi
 
     SectionController *controller = [[[SectionController alloc]
         initWithDatabase:database_
+        source:[self source]
         section:[section name]
     ] autorelease];
     [controller setDelegate:delegate_];
@@ -7565,9 +7555,10 @@ static void HomeControllerReachabilityCallback(SCNetworkReachabilityRef reachabi
     [super releaseSubviews];
 }
 
-- (id) initWithDatabase:(Database *)database {
+- (id) initWithDatabase:(Database *)database source:(Source *)source {
     if ((self = [super init]) != nil) {
         database_ = database;
+        key_ = [source key];
     } return self;
 }
 
@@ -7581,8 +7572,13 @@ static void HomeControllerReachabilityCallback(SCNetworkReachabilityRef reachabi
 
     NSMutableDictionary *sections([NSMutableDictionary dictionaryWithCapacity:32]);
 
+    Source *source([self source]);
+
     _trace();
     for (Package *package in packages) {
+        if (source != nil && [package source] != source)
+            continue;
+
         NSString *name([package section]);
         NSString *key(name == nil ? @"" : name);
 
@@ -8342,17 +8338,15 @@ static void HomeControllerReachabilityCallback(SCNetworkReachabilityRef reachabi
 
 - (void) queueStatusDidChange {
 #if !AlwaysReload
-    if (IsWildcat_) {
-        if (Queuing_) {
-            [[self navigationItem] setLeftBarButtonItem:[[[UIBarButtonItem alloc]
-                initWithTitle:UCLocalize("QUEUE")
-                style:UIBarButtonItemStyleDone
-                target:self
-                action:@selector(queueButtonClicked)
-            ] autorelease]];
-        } else {
-            [[self navigationItem] setLeftBarButtonItem:nil];
-        }
+    if (Queuing_) {
+        [[self navigationItem] setLeftBarButtonItem:[[[UIBarButtonItem alloc]
+            initWithTitle:UCLocalize("QUEUE")
+            style:UIBarButtonItemStyleDone
+            target:self
+            action:@selector(queueButtonClicked)
+        ] autorelease]];
+    } else {
+        [[self navigationItem] setLeftBarButtonItem:nil];
     }
 #endif
 }
@@ -8432,6 +8426,13 @@ static void HomeControllerReachabilityCallback(SCNetworkReachabilityRef reachabi
     [NSThread detachNewThreadSelector:@selector(_setSource:) toTarget:self withObject:url_];
 }
 
+- (void) setAllSource {
+    icon_ = [UIImage applicationImageNamed:@"folder.png"];
+    origin_ = UCLocalize("ALL_SOURCES");
+    label_ = UCLocalize("ALL_SOURCES_EX");
+    [content_ setNeedsDisplay];
+}
+
 - (SourceCell *) initWithFrame:(CGRect)frame reuseIdentifier:(NSString *)reuseIdentifier {
     if ((self = [super initWithFrame:frame reuseIdentifier:reuseIdentifier]) != nil) {
         UIView *content([self contentView]);
@@ -8482,45 +8483,6 @@ static void HomeControllerReachabilityCallback(SCNetworkReachabilityRef reachabi
     if (!highlighted)
         UISetColor(Gray_);
     [label_ drawAtPoint:CGPointMake(48, 29) forWidth:(width - 65) withFont:Font12_ lineBreakMode:UILineBreakModeTailTruncation];
-}
-
-@end
-/* }}} */
-/* Source Controller {{{ */
-@interface SourceController : FilteredPackageListController {
-    _transient Source *source_;
-    _H<NSString> key_;
-}
-
-- (id) initWithDatabase:(Database *)database source:(Source *)source;
-
-@end
-
-@implementation SourceController
-
-- (NSURL *) referrerURL {
-    return [NSURL URLWithString:[NSString stringWithFormat:@"%@/#!/sources/%@", UI_, [key_ stringByAddingPercentEscapesIncludingReserved]]];
-}
-
-- (NSURL *) navigationURL {
-    return [NSURL URLWithString:[NSString stringWithFormat:@"cydia://sources/%@", [key_ stringByAddingPercentEscapesIncludingReserved]]];
-}
-
-- (id) initWithDatabase:(Database *)database source:(Source *)source {
-    if ((self = [super initWithDatabase:database title:[source label] filter:@selector(isVisibleInSource:) with:source]) != nil) {
-        source_ = source;
-        key_ = [source key];
-    } return self;
-}
-
-- (void) reloadData {
-    source_ = [database_ sourceWithKey:key_];
-    key_ = [source_ key];
-    [self setObject:source_];
-
-    [[self navigationItem] setTitle:[source_ label]];
-
-    [super reloadData];
 }
 
 @end
@@ -8583,57 +8545,70 @@ static void HomeControllerReachabilityCallback(SCNetworkReachabilityRef reachabi
 }
 
 - (NSInteger) numberOfSectionsInTableView:(UITableView *)tableView {
-    return 1;
+    return 2;
 }
 
 - (NSString *) tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
+    if (section == 1)
+        return UCLocalize("INDIVIDUAL_SOURCES");
     return nil;
 }
 
 - (NSInteger) tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    return [sources_ count];
+    switch (section) {
+        case 0: return 1;
+        case 1: return [sources_ count];
+        default: return 0;
+    }
 }
 
 - (Source *) sourceAtIndexPath:(NSIndexPath *)indexPath {
 @synchronized (database_) {
     if ([database_ era] != era_)
         return nil;
-
+    if ([indexPath section] != 1)
+        return nil;
     NSUInteger index([indexPath row]);
-    return index < [sources_ count] ? [sources_ objectAtIndex:index] : nil;
+    if (index >= [sources_ count])
+        return nil;
+    return [sources_ objectAtIndex:index];
 } }
 
 - (UITableViewCell *) tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     static NSString *cellIdentifier = @"SourceCell";
 
     SourceCell *cell = (SourceCell *) [tableView dequeueReusableCellWithIdentifier:cellIdentifier];
-    if(cell == nil) cell = [[[SourceCell alloc] initWithFrame:CGRectZero reuseIdentifier:cellIdentifier] autorelease];
-    [cell setSource:[self sourceAtIndexPath:indexPath]];
+    if (cell == nil) cell = [[[SourceCell alloc] initWithFrame:CGRectZero reuseIdentifier:cellIdentifier] autorelease];
     [cell setAccessoryType:UITableViewCellAccessoryDisclosureIndicator];
+
+    Source *source([self sourceAtIndexPath:indexPath]);
+    if (source == nil)
+        [cell setAllSource];
+    else
+        [cell setSource:source];
 
     return cell;
 }
 
 - (void) tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
-    Source *source = [self sourceAtIndexPath:indexPath];
-    if (source == nil) return;
-
-    SourceController *controller = [[[SourceController alloc]
+    SectionsController *controller([[[SectionsController alloc]
         initWithDatabase:database_
-        source:source
-    ] autorelease];
+        source:[self sourceAtIndexPath:indexPath]
+    ] autorelease]);
 
     [controller setDelegate:delegate_];
-
     [[self navigationController] pushViewController:controller animated:YES];
 }
 
 - (BOOL) tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath {
+    if ([indexPath section] != 1)
+        return false;
     Source *source = [self sourceAtIndexPath:indexPath];
     return [source record] != nil;
 }
 
 - (void) tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
+    _assert([indexPath section] == 1);
     if (editingStyle ==  UITableViewCellEditingStyleDelete) {
         Source *source = [self sourceAtIndexPath:indexPath];
         if (source == nil) return;
@@ -8951,7 +8926,7 @@ static void HomeControllerReachabilityCallback(SCNetworkReachabilityRef reachabi
         action:@selector(editButtonClicked)
     ] autorelease] animated:animated];
 
-    if (IsWildcat_ && !editing)
+    if (!editing)
         [[self navigationItem] setLeftBarButtonItem:[[[UIBarButtonItem alloc]
             initWithTitle:UCLocalize("SETTINGS")
             style:UIBarButtonItemStylePlain
@@ -9910,14 +9885,6 @@ static void HomeControllerReachabilityCallback(SCNetworkReachabilityRef reachabi
         NSString *destination = [[url absoluteString] substringFromIndex:([scheme length] + [@"://" length] + [base length] + [@"/" length])];
         controller = [[[CydiaWebViewController alloc] initWithURL:[NSURL URLWithString:destination]] autorelease];
     } else if (!external && [components count] == 1) {
-        if ([base isEqualToString:@"manage"]) {
-            controller = [[[ManageController alloc] init] autorelease];
-        }
-
-        if ([base isEqualToString:@"storage"]) {
-            controller = [[[CydiaWebViewController alloc] initWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@/storage/", UI_]]] autorelease];
-        }
-
         if ([base isEqualToString:@"sources"]) {
             controller = [[[SourcesController alloc] initWithDatabase:database_] autorelease];
         }
@@ -9927,7 +9894,7 @@ static void HomeControllerReachabilityCallback(SCNetworkReachabilityRef reachabi
         }
 
         if ([base isEqualToString:@"sections"]) {
-            controller = [[[SectionsController alloc] initWithDatabase:database_] autorelease];
+            controller = [[[SectionsController alloc] initWithDatabase:database_ source:nil] autorelease];
         }
 
         if ([base isEqualToString:@"search"]) {
@@ -9953,9 +9920,9 @@ static void HomeControllerReachabilityCallback(SCNetworkReachabilityRef reachabi
         }
 
         if (!external && [base isEqualToString:@"sections"]) {
-            if ([argument isEqualToString:@"all"])
+            if ([argument isEqualToString:@"all"] || [argument isEqualToString:@"*"])
                 argument = nil;
-            controller = [[[SectionController alloc] initWithDatabase:database_ section:[argument stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding]] autorelease];
+            controller = [[[SectionController alloc] initWithDatabase:database_ source:nil section:argument] autorelease];
         }
 
         if (!external && [base isEqualToString:@"sources"]) {
@@ -9964,7 +9931,7 @@ static void HomeControllerReachabilityCallback(SCNetworkReachabilityRef reachabi
                 [(SourcesController *)controller showAddSourcePrompt];
             } else {
                 Source *source = [database_ sourceWithKey:[argument stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
-                controller = [[[SourceController alloc] initWithDatabase:database_ source:source] autorelease];
+                controller = [[[SectionsController alloc] initWithDatabase:database_ source:source] autorelease];
             }
         }
 
@@ -9985,6 +9952,12 @@ static void HomeControllerReachabilityCallback(SCNetworkReachabilityRef reachabi
                     [(FileTable *)controller setPackage:package];
                 }
             }
+        }
+
+        if ([base isEqualToString:@"sections"]) {
+            Source *source([arg1 isEqualToString:@"*"] ? nil : [database_ sourceWithKey:arg1]);
+            NSString *section([arg2 isEqualToString:@"*"] ? nil : arg2);
+            controller = [[[SectionController alloc] initWithDatabase:database_ source:source section:section] autorelease];
         }
     }
 
@@ -10094,17 +10067,11 @@ static void HomeControllerReachabilityCallback(SCNetworkReachabilityRef reachabi
 
     NSMutableArray *items([NSMutableArray arrayWithObjects:
         [[[UITabBarItem alloc] initWithTitle:@"Cydia" image:[UIImage applicationImageNamed:@"home.png"] tag:0] autorelease],
-        [[[UITabBarItem alloc] initWithTitle:UCLocalize("SECTIONS") image:[UIImage applicationImageNamed:@"install.png"] tag:0] autorelease],
+        [[[UITabBarItem alloc] initWithTitle:UCLocalize("SOURCES") image:[UIImage applicationImageNamed:@"install.png"] tag:0] autorelease],
         [[[UITabBarItem alloc] initWithTitle:(AprilFools_ ? @"Timeline" : UCLocalize("CHANGES")) image:[UIImage applicationImageNamed:@"changes.png"] tag:0] autorelease],
+        [[[UITabBarItem alloc] initWithTitle:UCLocalize("INSTALLED") image:[UIImage applicationImageNamed:@"manage.png"] tag:0] autorelease],
         [[[UITabBarItem alloc] initWithTitle:UCLocalize("SEARCH") image:[UIImage applicationImageNamed:@"search.png"] tag:0] autorelease],
     nil]);
-
-    if (IsWildcat_) {
-        [items insertObject:[[[UITabBarItem alloc] initWithTitle:UCLocalize("SOURCES") image:[UIImage applicationImageNamed:@"source.png"] tag:0] autorelease] atIndex:3];
-        [items insertObject:[[[UITabBarItem alloc] initWithTitle:UCLocalize("INSTALLED") image:[UIImage applicationImageNamed:@"manage.png"] tag:0] autorelease] atIndex:3];
-    } else {
-        [items insertObject:[[[UITabBarItem alloc] initWithTitle:UCLocalize("MANAGE") image:[UIImage applicationImageNamed:@"manage.png"] tag:0] autorelease] atIndex:3];
-    }
 
     NSMutableArray *controllers([NSMutableArray array]);
     for (UITabBarItem *item in items) {
@@ -10229,14 +10196,9 @@ _trace();
 - (NSArray *) defaultStartPages {
     NSMutableArray *standard = [NSMutableArray array];
     [standard addObject:[NSArray arrayWithObject:@"cydia://home"]];
-    [standard addObject:[NSArray arrayWithObject:@"cydia://sections"]];
+    [standard addObject:[NSArray arrayWithObject:@"cydia://sources"]];
     [standard addObject:[NSArray arrayWithObject:@"cydia://changes"]];
-    if (!IsWildcat_) {
-        [standard addObject:[NSArray arrayWithObject:@"cydia://manage"]];
-    } else {
-        [standard addObject:[NSArray arrayWithObject:@"cydia://installed"]];
-        [standard addObject:[NSArray arrayWithObject:@"cydia://sources"]];
-    }
+    [standard addObject:[NSArray arrayWithObject:@"cydia://installed"]];
     [standard addObject:[NSArray arrayWithObject:@"cydia://search"]];
     return standard;
 }
